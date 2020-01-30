@@ -77,9 +77,13 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
     else{
       all_wind <- vector("list", length = 0)
       len_run <- length(cont_param[[1]])
+      third <- (2*(0.2*len_run))
       fourth <- (3*(0.2*len_run))
       fifth <- (4*(0.2*len_run))
-      all_wind[[1]] <- cont_param[fourth:fifth,]
+      
+      # gets the third window of the run
+      all_wind[[1]] <- cont_param[third:fourth,]
+      #gets the fifth window of the run
       all_wind[[2]] <- cont_param[fifth:len_run,]
       return(all_wind)
     }
@@ -93,9 +97,13 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
     else{
       all_wind <- vector("list", length = 0)
       len_run <- length(x)
+      third <- (2*(0.2*len_run))
       fourth <- (3*(0.2*len_run))
       fifth <- (4*(0.2*len_run))
-      all_wind[[1]] <- x[fourth:fifth]
+      
+      #gets the third window of the run
+      all_wind[[1]] <- x[third:fourth]
+      #gets the fifth window of the run
       all_wind[[2]] <- x[fifth:len_run]
       return(all_wind)
     }
