@@ -53,6 +53,7 @@ loadFiles <- function(path,format="revbayes", burnin = 0.1, tree_name =  "psi", 
     
     output <- load.multi(path , format = format, labels=vec) # add burnin
     
+    # exclude combined files
     count_sizes <- vector("double", length=0)
     
     for (i in 1:length(output)){
@@ -94,7 +95,19 @@ loadFiles <- function(path,format="revbayes", burnin = 0.1, tree_name =  "psi", 
         stop("What have you done?")
       }
     }
+    
+    # exclude logs for when there is only tree files
+    if (length(logFiles) == 0){
+      
+      for(i in 1:length(output)){
+        
+        output[[i]]$ptable <- vector("list", length = 0)
+        
+      }
+    }
   }
+  
   return(output)
+  
 }
 

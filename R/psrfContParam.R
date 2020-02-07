@@ -13,7 +13,7 @@
 #' 
 #' @export
 
-psrfContParams <- function(runs, windows=FALSE, max=1.01, conf_interval = 0.95, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior"){
+psrfContParams <- function(runs, windows=FALSE, conf_interval = 0.95, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior"){
 
   if (!windows){
     
@@ -46,7 +46,7 @@ psrfContParams <- function(runs, windows=FALSE, max=1.01, conf_interval = 0.95, 
 
       psrf_windows <- gelman.diag(list_windows,confidence = conf_interval, transform = FALSE, autoburnin = FALSE, multivariate = FALSE)
       
-      list_gelman[[i]] <- psrf_diag_runs
+      list_gelman[[i]] <- psrf_windows
       
     }
     

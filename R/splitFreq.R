@@ -15,6 +15,8 @@
 
 splitFreq <- function(runs, windows=FALSE){
   
+  vecSplits <- vector(length = 0)
+  
   if(!windows){
     
     all_df <- vector("list", length = 0)
@@ -24,8 +26,6 @@ splitFreq <- function(runs, windows=FALSE){
       cladefreqs <- clade.freq.named(x, start = 1, end = length(x))
       all_df[[i]] <- cladefreqs
     }
-    
-    vecSplits <- vector(length = 0)
     
     for (r1 in 1:(length(all_df)-1)){
       #print(r1)
@@ -41,14 +41,13 @@ splitFreq <- function(runs, windows=FALSE){
   }
   
   else{
+    
     for (i in 1:length(runs)){
       
       x <- getInfo(runs, i, trees=TRUE, splitWindows = TRUE)
       
       compar_1 <- clade.freq.named(x[[1]], start = 1, end = length(x[[1]]))
       compar_2 <- clade.freq.named(x[[2]], start = 1, end = length(x[[2]]))
-      
-      vecSplits <- vector(length = 0)
       
       for (z in 1:length(compar_1[[1]])) {
         for (j in 1:length(compar_2[[1]])) {
@@ -61,5 +60,6 @@ splitFreq <- function(runs, windows=FALSE){
   }
   
   return(vecSplits)
+  
 }
 

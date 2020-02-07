@@ -14,7 +14,7 @@
 #' @export
 
 
-essContParam <- function(runs, miness = 200, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior") {
+essContParam <- function(runs, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior") {
 
   vecEss <- vector("list", length = 0)
   for (i in 1:length(runs)) {

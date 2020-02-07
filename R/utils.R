@@ -62,6 +62,11 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   return(clade.df)
 }
 
+# Calculates min ESS according to the std error of the mean
+minESS <- function(per){
+  return((1/(per*4))^2)
+}
+
 # Get the continuous parameters or the trees of a list of rwty.trees, returns a dataframe
 getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows = FALSE){
   
