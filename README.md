@@ -58,4 +58,16 @@ You can install the package using devtools:
 
 ## Example
 
-To test the package, download the example output. There are two output examples provided, one with 2 runs and the other with 4 runs.
+To test the package, download the example output. There are two output examples provided, one with 2 runs and the other with 4 runs.<br />
+Save the examples in separate folders, you can name them 2_runs and 4_runs or as you wish.<br />
+In your R enviroment:
+
+`library(convenience)`<br />
+ `setwd(path_to_example)`<br />
+ `checkConvergence(".", burnin = 0.1, min_split = 0.05, percent = 0.01, min_stats = 0.5, max_psrf = 1.05)`<br />
+ 
+ You will see as an output some messages.
+ 
+1. If your MCMC failed to converge: **Try running your MCMC for more iterations**
+ 
+ 
