@@ -126,5 +126,5 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
       print(paste("The following parameters failed in PSRF:", name_psrf))
     }
   }
-}
+  }
 
