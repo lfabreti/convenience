@@ -24,17 +24,17 @@ You can install the package using devtools:
 
 ## Functions
 
-### For _**Trees**_
-
 #### Load output
 
 `loadFiles()`
 
-### For _**Continuous Parameters**_
+### For _**Trees**_
 
 #### Difference between split frquencies
 
 `splitFreq()`
+
+### For _**Continuous Parameters**_
 
 #### ESS 
 
