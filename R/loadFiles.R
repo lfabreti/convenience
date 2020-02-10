@@ -23,7 +23,7 @@ loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi"
   
   output <- list()
   files <- list.files(path, recursive=F)
-  files <- files[ grepl("*run*", files) ]
+  files <- files[ grepl("*run*|*joint*", files) ]
   
   logFiles <- files[ grepl(log_ext, files) ]
   treeFiles <- files[ grepl(tree_ext, files) ]

@@ -45,6 +45,7 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     min_ess <- minESS(percent)
     ess_runs <- essContParam(my_runs)
     
+    
     for (i in 1:length(ess_runs)) {
       for (j in 1:length(ess_runs[[1]])) {
         if (ess_runs[[i]][j] < min_ess){
