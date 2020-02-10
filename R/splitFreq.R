@@ -31,7 +31,7 @@ splitFreq <- function(runs, windows=FALSE){
       #print(r1)
       for (z in 1:length(all_df[[r1]]$cladenames)){
         for (j in 1:length(all_df[[r1+1]]$cladenames)){
-          if(all_df[[r1]]$cladenames[z] == all_df[[r1+1]]$cladenames[j]){
+          if( as.character(all_df[[r1]]$cladenames[z]) == as.character(all_df[[r1+1]]$cladenames[j]) ){
             vecSplits <- c ( vecSplits, ( abs (all_df[[r1]]$cladefreqs[z] - all_df[[r1+1]]$cladefreqs[j] ) ) )
           }
         }
@@ -51,7 +51,7 @@ splitFreq <- function(runs, windows=FALSE){
       
       for (z in 1:length(compar_1[[1]])) {
         for (j in 1:length(compar_2[[1]])) {
-          if(compar_1$cladenames[z] == compar_2$cladenames[j]){
+          if( as.character(compar_1$cladenames[z]) == as.character(compar_2$cladenames[j]) ){
             vecSplits <- c(vecSplits, ( abs(compar_1$cladefreqs[z] - compar_2$cladefreqs[j])) )
           }
         }
