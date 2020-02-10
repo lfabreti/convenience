@@ -6,21 +6,21 @@ R package for convergence assessment for phylogenetic inference.
 
 You can install the package using devtools:
   
-  > install.packages("devtools") <br />
-  > library(devtools) <br />
-  > install_github("lfabreti/convenience") <br />
-  > library(convenience) <br />
+  > `install.packages("devtools")` <br />
+  > `library(devtools)` <br />
+  > `install_github("lfabreti/convenience")` <br />
+  > `library(convenience)` <br />
   
   
 ---------------------------------------------------------
 
 ## How to use
 
-> 1. The first step is to load your output files from RevBayes. You can do it by giving the path to the output, all the files for all your runs will be loaded
+ 1. The first step is to load your output files from RevBayes. You can do it by giving the path to the output, all the files for all your runs will be loaded
 
-> 2. The functions are divided to check for convergence in _**Continuous parameters**_ and _**Trees**_
+ 2. The functions are divided to check for convergence in _**Continuous parameters**_ and _**Trees**_
 
-> 3. You can see the output for each function separately or run one wrap up function that automatically checks for convergence 
+ 3. You can see the output for each function separately or run one wrap up function that automatically checks for convergence 
 
 ## Functions
 
