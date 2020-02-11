@@ -60,14 +60,30 @@ You can install the package using devtools:
 
 To test the package, download the example output. There are two output examples provided, one with 2 runs and the other with 4 runs.<br />
 Save the examples in separate folders, you can name them 2_runs and 4_runs or as you wish.<br />
+
+#### Full convergence test
+
 In your R enviroment:
 
-`library(convenience)`<br />
+ `library(convenience)`<br />
  `setwd(path_to_example)`<br />
  `checkConvergence(".", burnin = 0.1, min_split = 0.05, percent = 0.01, min_stats = 0.5, max_psrf = 1.05)`<br />
  
  You will see as an output some messages.
  
 1. If your MCMC failed to converge: **Try running your MCMC for more iterations**
- 
+
+#### Check each convergence function
+
+If you want to see the output for each function:
+
+`my_runs <- loadFiles(path_to_example)`<br />
+`essContParam(my_runs)`<br />
+`psrfContParams(my_runs, windows = T)`<br />
+`psrfContParams(my_runs, windows = F)`<br />
+`stderrContParam(my_runs)`<br />
+`statsContParam(my_runs, windows = T)`<br />
+`statsContParam(my_runs, windows = F)`<br />
+`splitFreq(my_runs, windows = T)`<br />
+`splitFreq(my_runs, windows = F)`<br />
  
