@@ -34,12 +34,12 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
         count <- count + 1
       }
     }
-    print(paste((count/length(vec_split_runs))*100,"% of the splits are above the minimum value"))
+    print(paste((count/length(vec_split_runs))*100,"% of the splits are below the minimum value"))
   }
   
   ## If we have log files, we check the cont parameters ##
   
-  if( length(my_runs[[1]]$ptable) > 0 ){ # if we have log files, we check the cont parameters
+  if( length(my_runs[[1]]$ptable) > 0 ){ 
     
     # check if min ESS is achieved for all cont parameters
     min_ess <- minESS(percent)
