@@ -5,13 +5,18 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
   # load the mcmc output
   my_runs <- loadFiles(runs, burnin, format = "revbayes")
   
-  #initializing a counter
+  # initializing a counter
   count = 0
   
-  name_stats <- vector("list", length = 0)
-  name_psrf <- vector("list", length = 0)
+  # initializing strings for name of parameters
+  name_psrf <- character(0)
+  names_ess <- character(0)
+  ks_result <- vector("list", length = 0)
   
-  ## If we have tree files, we check split freq ##
+  
+  #################################################
+  ## IF WE HAVE TREE FILES, WE CHECK THE SPLITS  ##
+  #################################################
   
   if( length(my_runs[[1]]$trees) > 0 ){ # if we have tree files, we check split freq
     
@@ -37,7 +42,10 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     print(paste((count/length(vec_split_runs))*100,"% of the splits are below the minimum value"))
   }
   
-  ## If we have log files, we check the cont parameters ##
+  
+  #########################################################
+  ## IF WE HAVE LOG FILES, WE CHECK THE CONTINUOUS PARAM ##
+  #########################################################
   
   if( length(my_runs[[1]]$ptable) > 0 ){ 
     
@@ -49,70 +57,18 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     for (i in 1:length(ess_runs)) {
       for (j in 1:length(ess_runs[[1]])) {
         if (ess_runs[[i]][j] < min_ess){
-          stop("Try running your MCMC for more iterations, ess not achieved for all parameters")
+          names_ess <- c(names_ess, (rownames(ess_runs)[j]))
         }
       }
     }
     
-    
-    # check if std error is within 1% of the 95% interval
-    std_error <- stderrContParam(my_runs)
-    max_std_error <- stderrMin(my_runs)
-    
-    comp <- mapply("-", max_std_error, std_error)
-    
-    for (i in 1:length(comp)) {
-      for (j in 1:length(comp[[1]])) {
-        if (comp[[i]][j] < 0){
-          stop("Try running your MCMC for more iterations, standard error of the mean is too large")
-        }
-      }
+    if (length(names_ess)>0){
+      print(paste("This parameters have ESS below", min_ess, ":"))
+      print(unique(names_ess))
     }
     
     
-    #check if stats within runs are ok
-    stats_values <- statsContParam(my_runs, windows = TRUE)
-    
-    for (i in 1:length(stats_values)) {
-      for (j in 1:length(stats_values[[1]])){
-        for (k in 1:nrow(stats_values[[1]][1])) {
-          if (stats_values[[i]][[j]][k] > min_stats){
-            stop("Try running your MCMC for more iterations, parameters did not converge within runs")
-          }
-        }
-      }
-    }
-    
-    #check if psrf within runs is ok
-    psrf_windows <- psrfContParams(my_runs, windows = TRUE)
-    
-    for (i in 1:length(psrf_windows)) {
-      for (j in 1:(length(psrf_windows[[1]]$psrf)/2)){
-        if( psrf_windows[[i]]$psrf[j] > max_psrf ){
-          stop("Try running your MCMC for more iterations, psrf did not converge within runs")
-        }
-      }
-    }
-    
-    # check stats between runs
-    stats_runs <- statsContParam(my_runs)
-    count <- 0
-    
-    for (i in 1:length(stats_runs)) {
-      for (j in 1:length(stats_runs[[1]])){
-        for (k in 1:nrow(stats_runs[[1]][1])) {
-          if (stats_runs[[i]][[j]][k] > min_stats){
-            name_stats <- c(name_stats, (rownames(stats_runs[[i]])[k]))
-          }
-        }
-      }
-    }
-    
-    if (length(name_stats)>0){
-      print(paste("The following parameters failed to converge:", name_stats))
-    }
-    
-    #check psrf between runs
+    # check psrf between runs
     psrf_runs <- psrfContParams(my_runs)
     
     for (i in 1:(length(psrf_runs[[1]])/2)) {
@@ -126,6 +82,27 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     if (length(name_psrf)>0){
       print(paste("The following parameters failed in PSRF:", name_psrf))
     }
+    
+    else{
+      print(paste("PSRF values are below", max_psrf))
+    }
+    
   }
+  
+  all_df <- vector("list", length = 0)
+  
+  for (i in 1:length(my_runs)) {
+    
+    #get the cont_param for each run
+    all_df[[i]] <- getInfo(runs, i, namesToExclude)
   }
+  
+  for (df1 in 1:(length(all_df)-1)){
+    for (i in 1:length(all_df[[df1]])) {
+      ks_result <-c( ks_result, (ks.test(all_df[[df1]][[i]], all_df[[df1+1]][[i]])))
+    }
+  }
+
+  
+}
 
