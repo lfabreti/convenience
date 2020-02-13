@@ -99,10 +99,16 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
   
   for (df1 in 1:(length(all_df)-1)){
     for (i in 1:length(all_df[[df1]])) {
-      ks_result <-c( ks_result, (ks.test(all_df[[df1]][[i]], all_df[[df1+1]][[i]])))
+      # ks_result <-c( ks_result, (ks.test(all_df[[df1]][[i]], all_df[[df1+1]][[i]])))
+      ks_result <- ks.test( all_df[[df1]][[i]] , all_df[[df1+1]][[i]] )
+      
+      if( (ks_result$p.value) < 0.05 ){
+        
+        print( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) )
+      }
     }
   }
-
+  
   
 }
 
