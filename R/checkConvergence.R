@@ -13,6 +13,9 @@ checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.0
   names_ess <- character(0)
   ks_result <- vector("list", length = 0)
   
+  # list of return
+  final_output <- character(0)
+  
   
   #################################################
   ## IF WE HAVE TREE FILES, WE CHECK THE SPLITS  ##
@@ -30,7 +33,10 @@ checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.0
       }
     }
     if(count>0){
-      print(paste( count,"splits are above the maximum value" ))
+      final_output <- c(final_output, paste( count,"splits are above the maximum value" ))
+    }
+    else{
+      final_output <- c(final_output, "All splits between windows are below the maximum value")
     }
     
     ## If the runs are ok, we compare the split freq between them ##
@@ -43,7 +49,8 @@ checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.0
         count <- count + 1
       }
     }
-    print(paste((count/length(vec_split_runs))*100,"% of the splits are below the maximum value"))
+    #print(paste((count/length(vec_split_runs))*100,"% of the splits are below the maximum value"))
+    final_output <- c( final_output, (paste((count/length(vec_split_runs))*100,"% of the splits are below the maximum value")) )
   }
   
   
@@ -67,8 +74,13 @@ checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.0
     }
     
     if (length(names_ess)>0){
-      print(paste("This parameters have ESS below", min_ess, ":"))
-      print(unique(names_ess))
+      final_output <- c(final_output, (paste("This parameters have ESS below", min_ess, ":")) )
+      final_output <- c(final_output, unique(names_ess))
+      #print(paste("This parameters have ESS below", min_ess, ":"))
+      #print(unique(names_ess))
+    }
+    else{
+      final_output <- c(final_output, paste("All parameters have ess above", min_ess) )
     }
     
     
@@ -82,11 +94,14 @@ checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.0
     }
     
     if (length(name_psrf)>0){
-      print("The following parameters failed in PSRF:")
-      print(name_psrf)
+      final_output <- c(final_output, (paste("This parameters have PSRF above", max_psrf, ":")) )
+      final_output <- c(final_output, name_psrf)
+      #print("The following parameters failed in PSRF:")
+      #print(name_psrf)
     }
     else{
-      print(paste("PSRF values are below", max_psrf))
+      final_output <- c(final_output,(paste("PSRF values are below", max_psrf)) )
+      #print(paste("PSRF values are below", max_psrf))
     }
     
     all_df <- vector("list", length = 0)
@@ -102,13 +117,13 @@ checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.0
         ks_result <- ks.test( all_df[[df1]][[i]] , all_df[[df1+1]][[i]] )
         
         if( (ks_result$p.value) < 0.05 ){
-          
-          print( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) )
+          final_output <- c(final_output, ( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) ) )
+          #print( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) )
         }
       }
     }
   }
   
-  
+  return(final_output)
 }
 
