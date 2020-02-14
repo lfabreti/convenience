@@ -1,6 +1,6 @@
 # For the naive user
 
-checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.01, min_stats = 0.5, max_psrf = 1.05){
+checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.01, max_psrf = 1.05, namesToExclude = "br_lens|bl|Iteration|Likelihood|Posterior|Prior"){
   
   # load the mcmc output
   my_runs <- loadFiles(runs, burnin, format = "revbayes")
@@ -25,21 +25,25 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     vec_splits_windows <- splitFreq(my_runs, windows = T)
     
     for (i in 1:length(vec_splits_windows)) {
-      if ( vec_splits_windows[i] > min_split ){
-        stop("Try running your MCMC for more iterations, splits between windows failed")
+      if ( vec_splits_windows[i] > max_split ){
+        count <- count+1
       }
+    }
+    if(count>0){
+      print(paste( count,"splits are above the maximum value" ))
     }
     
     ## If the runs are ok, we compare the split freq between them ##
     
+    count <- 0
     vec_split_runs <- splitFreq(my_runs)
     
     for (i in 1:length(vec_split_runs)) {
-      if(vec_split_runs[1] < min_split){
+      if(vec_split_runs[1] < max_split){
         count <- count + 1
       }
     }
-    print(paste((count/length(vec_split_runs))*100,"% of the splits are below the minimum value"))
+    print(paste((count/length(vec_split_runs))*100,"% of the splits are below the maximum value"))
   }
   
   
@@ -51,7 +55,7 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     
     # check if min ESS is achieved for all cont parameters
     min_ess <- minESS(percent)
-    ess_runs <- essContParam(my_runs)
+    ess_runs <- essContParam(my_runs, namesToExclude)
     
     
     for (i in 1:length(ess_runs)) {
@@ -69,42 +73,38 @@ checkConvergence <- function(runs, burnin = 0.1, min_split = 0.05, percent = 0.0
     
     
     # check psrf between runs
-    psrf_runs <- psrfContParams(my_runs)
+    psrf_runs <- psrfContParams(my_runs, namesToExclude = namesToExclude)
     
     for (i in 1:(length(psrf_runs[[1]])/2)) {
       if( psrf_runs[[1]][i] > max_psrf){
-        print(psrf_runs[[1]][i])
         name_psrf <- c(name_psrf, (rownames(psrf_runs[[1]])[i]))
-        print( rownames(psrf_runs[[1]])[i] )
       }
     }
     
     if (length(name_psrf)>0){
-      print(paste("The following parameters failed in PSRF:", name_psrf))
+      print("The following parameters failed in PSRF:")
+      print(name_psrf)
     }
-    
     else{
       print(paste("PSRF values are below", max_psrf))
     }
     
-  }
-  
-  all_df <- vector("list", length = 0)
-  
-  for (i in 1:length(my_runs)) {
+    all_df <- vector("list", length = 0)
     
-    #get the cont_param for each run
-    all_df[[i]] <- getInfo(runs, i, namesToExclude)
-  }
-  
-  for (df1 in 1:(length(all_df)-1)){
-    for (i in 1:length(all_df[[df1]])) {
-      # ks_result <-c( ks_result, (ks.test(all_df[[df1]][[i]], all_df[[df1+1]][[i]])))
-      ks_result <- ks.test( all_df[[df1]][[i]] , all_df[[df1+1]][[i]] )
-      
-      if( (ks_result$p.value) < 0.05 ){
+    for (i in 1:length(my_runs)) {
+      #get the cont_param for each run
+      all_df[[i]] <- getInfo(my_runs, i, namesToExclude)
+    }
+    
+    for (df1 in 1:(length(all_df)-1)){
+      for (i in 1:length(all_df[[df1]])) {
+        # ks_result <-c( ks_result, (ks.test(all_df[[df1]][[i]], all_df[[df1+1]][[i]])))
+        ks_result <- ks.test( all_df[[df1]][[i]] , all_df[[df1+1]][[i]] )
         
-        print( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) )
+        if( (ks_result$p.value) < 0.05 ){
+          
+          print( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) )
+        }
       }
     }
   }
