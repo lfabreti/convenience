@@ -27,11 +27,17 @@ splitFreq <- function(runs, windows=FALSE){
       all_df[[i]] <- cladefreqs
     }
     
+    # initiate some vectors to plot splits against runs
+    vec1 <- vector()
+    vec2 <- vector()
+    
     for (r1 in 1:(length(all_df)-1)){
       #print(r1)
       for (z in 1:length(all_df[[r1]]$cladenames)){
         for (j in 1:length(all_df[[r1+1]]$cladenames)){
           if( as.character(all_df[[r1]]$cladenames[z]) == as.character(all_df[[r1+1]]$cladenames[j]) ){
+            #vec1 <- c(vec1, all_df[[r1]]$cladefreqs[z])
+            #vec2 <- c(vec2, all_df[[r1+1]]$cladefreqs[j])
             vecSplits <- c ( vecSplits, ( abs (all_df[[r1]]$cladefreqs[z] - all_df[[r1+1]]$cladefreqs[j] ) ) )
           }
         }
