@@ -13,7 +13,7 @@
 #' 
 #' @export
 
-splitFreq <- function(runs, windows=FALSE){
+splitFreq <- function(runs, windows=FALSE, ESS = 100){
   
   vecSplits <- vector(length = 0)
   
@@ -57,8 +57,20 @@ splitFreq <- function(runs, windows=FALSE){
       
       for (z in 1:length(compar_1[[1]])) {
         for (j in 1:length(compar_2[[1]])) {
+          sum_freq <- 0
+          exp_diff <- 0 
+          obs_diff <-0
           if( as.character(compar_1$cladenames[z]) == as.character(compar_2$cladenames[j]) ){
-            vecSplits <- c(vecSplits, ( abs(compar_1$cladefreqs[z] - compar_2$cladefreqs[j])) )
+
+            obs_diff <- ( abs(compar_1$cladefreqs[z] - compar_2$cladefreqs[j]))
+            
+            sum_freq <- ( (compar_1$cladefreqs[z]*length(x[[1]])) + (compar_2$cladefreqs[j]*length(x[[2]])) ) / ( length(x[[1]])+length(x[[2]]) )
+            
+            for (i in 1:ESS){
+	            exp_diff <- exp_diff + abs(i/ESS-sum_freq)* dbinom(i, size = ESS, prob = sum_freq)
+            }
+
+            vecSplits <- c(vecSplits, (exp_diff-obs_diff))
           }
         }
       }
