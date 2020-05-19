@@ -1,6 +1,6 @@
 # For the naive user
 
-checkConvergence <- function(runs, burnin = 0.1, max_split = 0.05, percent = 0.01, max_psrf = 1.05, namesToExclude = "br_lens|bl|Iteration|Likelihood|Posterior|Prior"){
+checkConvergence <- function(runs, burnin = 0.1, max_split = 0.01, percent = 0.01, max_psrf = 1.05, namesToExclude = "br_lens|bl|Iteration|Likelihood|Posterior|Prior"){
   
   # load the mcmc output
   my_runs <- loadFiles(runs, burnin, format = "revbayes")
