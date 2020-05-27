@@ -1,3 +1,65 @@
+clade.freq.tree <- function (x, rooted=FALSE, ...) {
+  
+  clades <-  prop.part(x)
+  
+  if(!rooted){
+    clades <- postprocess.prop.part(clades)
+  }
+  
+  cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
+  
+  tiplabels <- as.character(x$tip.label)
+  
+  cladenames <- rep(NA, length(clades))
+  
+  for(i in 1:length(clades)){
+    taxa_indices <- clades[[i]]
+    taxa <- tiplabels[taxa_indices]
+    sorted_taxa <- sort(taxa)
+    cladenames[i] <- paste(sorted_taxa, collapse=" ")
+  }
+  
+  clade.df <- data.frame(cladenames, cladefreqs)
+  
+  return(clade.df)
+}
+
+clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
+  
+  if(class(x) == "rwty.chain"){
+    x <- x$trees
+  }
+  
+  if (length(x) == 1 && class(x[[1]]) == "multiPhylo"){
+    x <- x[[1]]
+  }
+  
+  x <- x[start:end]
+  
+  clades <-  prop.part(x)
+  
+  if(!rooted){
+    clades <- postprocess.prop.part(clades)
+  }
+  
+  cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
+  
+  tiplabels <- as.character(x[[1]]$tip.label)
+  
+  cladenames <- rep(NA, length(clades))
+  
+  for(i in 1:length(clades)){
+    taxa_indices <- clades[[i]]
+    taxa <- tiplabels[taxa_indices]
+    sorted_taxa <- sort(taxa)
+    cladenames[i] <- paste(sorted_taxa, collapse=" ")
+  }
+  
+  clade.df <- data.frame(cladenames, cladefreqs)
+  
+  return(clade.df)
+}
+
 # Function to calculate ESS according to Tracer
 essTracer <- function(input,stepSize = 1){
   
@@ -76,11 +138,11 @@ x <- x[start:end]
 clades.list <- list()
 
 for (i in 1:length(x)) {
-  clades.list[[i]] <- prop.part(x[[i]])
+  clades.list[[i]] <- clade.freq.tree(x[[i]])
 }
 
-clades <-  prop.part(x)
-total_n_splits <- length(clades)
+clades <-  clade.freq.trees(x, start = start, end = end)
+total_n_splits <- length(clades$cladenames)
 
 
 # Let's calculate ESS
@@ -92,7 +154,7 @@ for (j in 1:total_n_splits) {
   is.split <- vector()
   
   for (i in 1:length(clades.list)) {
-    if (clades[j] %in% clades.list[[i]]){
+    if (clades$cladenames[j] %in% clades.list[[i]]$cladenames){
       is.split <- c(is.split, 1)
     }
     else{
