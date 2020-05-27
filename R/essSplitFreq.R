@@ -39,6 +39,8 @@ for (j in 1:total_n_splits) {
   }
   splits <- as.mcmc(is.split)
   traceplot(splits)
+  title(main = paste(effectiveSize(is.split),ess(is.split)))
+  
   ess_splits_coda <- c(ess_splits_coda, effectiveSize(is.split))
   ess_splits_mcmcse <- c(ess_splits_mcmcse, ess(is.split))
   
