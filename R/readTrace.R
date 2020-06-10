@@ -112,7 +112,7 @@ readTrace <- function(paths, format = "simple",
   
   treelist <- NULL
   gens.per.tree <- NULL
-  ptable <- output
+  ptable <- output[[1]]
   output <- list("trees" = treelist, "ptable" = ptable, "gens.per.tree" = gens.per.tree)
   class(output) <- "rwty.chain"
   

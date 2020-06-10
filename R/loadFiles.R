@@ -34,12 +34,13 @@ loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi"
   }
   
   else if ( length(logFiles) > 0 & length(treeFiles) == 0 ){
-    
+    setwd(path)
     output <- list()
     for (i in 1:length(logFiles)){
       
       output[[i]] <- readTrace(logFiles[i], burnin = burnin)
     }
+    setwd("..")
     
   }
   
@@ -107,6 +108,16 @@ loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi"
         
       }
     }
+  }
+  
+  # Exclude continuous parameters that are fixed
+  for (i in 1:length(output)) {
+    for (j in 1:length(output[[i]]$ptable)) {
+      if( var(output[[i]]$ptable[j]) == 0 ){
+        output[[i]]$ptable[j] <- NULL
+      }
+    }
+    
   }
   
   return(output)

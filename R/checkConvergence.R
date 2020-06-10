@@ -1,128 +1,252 @@
 # For the naive user
 
-checkConvergence <- function(runs, burnin = 0.1, max_split = 0.01, percent = 0.01, max_psrf = 1.05, namesToExclude = "br_lens|bl|Iteration|Likelihood|Posterior|Prior"){
+checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclude = "br_lens|bl|Iteration|Likelihood|Posterior|Prior"){
+  
+  final_output <- list()
   
   # load the mcmc output
-  my_runs <- loadFiles(runs, burnin, format = "revbayes")
+  my_runs <- loadFiles(path, burnin, format = "revbayes")
   
-  # initializing a counter
-  count = 0
+  # calculating minimum ESS according to precision
+  minimumESS <- minESS(precision)
   
-  # initializing strings for name of parameters
-  name_psrf <- character(0)
-  names_ess <- character(0)
-  ks_result <- vector("list", length = 0)
+  compar_names <- vector()
+  for (r1 in 1:(length(my_runs)-1)) {
+    for (r2 in (r1+1):length(my_runs)) {
+      compar_names <- c(compar_names, paste("Run", r1, "&", "Run", r2))
+    }
+  }
   
-  # list of return
-  final_output <- character(0)
-  
+  # list of results
+  output_tree_parameters <- list()
+  output_continuous_parameters <- list()
   
   #################################################
   ## IF WE HAVE TREE FILES, WE CHECK THE SPLITS  ##
   #################################################
   
-  if( length(my_runs[[1]]$trees) > 0 ){ # if we have tree files, we check split freq
+  if( length(my_runs[[1]]$trees) > 0 ){ # if we have tree files, we check split freq and ESS of splits
     
-    ## First we check if the runs are ok, by comparing windows of the same run ##
+    ## ESS ##
     
-    vec_splits_windows <- splitFreq(my_runs, windows = T)
+    ess_runs_splits <- essSplitFreq(my_runs)
     
-    for (i in 1:length(vec_splits_windows)) {
-      if ( vec_splits_windows[i] > max_split ){
-        count <- count+1
+    for (i in 1:length(ess_runs_splits)) {
+      ess_runs_splits[[i]] <- ess_runs_splits[[i]] - minimumESS
+    }
+    
+    output_tree_parameters[[1]] <- ess_runs_splits
+    
+    ## Compare windows ##
+    
+    splits_windows <- splitFreq(my_runs, windows = T)
+    
+    exp_diff_windows <- expectedDiffSplits(100)
+    
+    for (i in 1:ncol(splits_windows)) {
+      splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 4)
+    }
+    
+    results_splits <- list()
+    for (i in 1:ncol(splits_windows)) {
+      results <- vector()
+      # index gets the indexes sorted
+      index <- which( exp_diff_windows[1,] %in% splits_windows[2,i]$listFrequencies )
+      vecNames <- vector()
+      
+      for (j in index) {
+        for (z in 1:length(splits_windows[2,i]$listFrequencies)) {
+          if( exp_diff_windows[1,j] == splits_windows[2,i]$listFrequencies[z]){
+            results <- c(results, exp_diff_windows[2,j] - splits_windows[1,i]$listSplits[z])
+            vecNames <- c( vecNames, names(splits_windows[1,i]$listSplits[z]))
+          }
+        }
       }
+      results_splits[[i]] <- results
+      names(results_splits[[i]]) <- vecNames
     }
-    if(count>0){
-      final_output <- c(final_output, paste( count,"splits are above the maximum value" ))
-    }
-    else{
-      final_output <- c(final_output, "All splits between windows are below the maximum value")
+    for (i in 1:length(results_splits)) {
+      names(results_splits)[i] <- paste("Run", i)
     }
     
-    ## If the runs are ok, we compare the split freq between them ##
+    output_tree_parameters[[2]] <- results_splits
     
-    count <- 0
-    vec_split_runs <- splitFreq(my_runs)
     
-    for (i in 1:length(vec_split_runs)) {
-      if(vec_split_runs[1] < max_split){
-        count <- count + 1
+    ## Compare runs ##
+    
+    splits_runs <- splitFreq(my_runs, windows = F)
+    
+    exp_diff_runs <- expectedDiffSplits(minimumESS)
+    
+    for (i in 1:ncol(splits_runs)) {
+      splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 4)
+    }
+    
+    results_splits_runs <- list()
+    for (i in 1:ncol(splits_runs)) {
+      results <- vector()
+      index <- which( exp_diff_runs[1,] %in% splits_runs[2,i]$listFrequencies )
+      vecNames <- vector()
+      
+      for (j in index) {
+        for (z in 1:length(splits_runs[2,i]$listFrequencies)) {
+          if( exp_diff_runs[1,j] == splits_runs[2,i]$listFrequencies[z]){
+            results <- c(results, exp_diff_runs[2,j] - splits_runs[1,i]$listSplits[z])
+            vecNames <- c( vecNames, names(splits_runs[1,i]$listSplits[z]))
+          }
+        }
       }
+      results_splits_runs[[i]] <- results
+      names(results_splits_runs[[i]]) <- vecNames
     }
-    #print(paste((count/length(vec_split_runs))*100,"% of the splits are below the maximum value"))
-    final_output <- c( final_output, (paste((count/length(vec_split_runs))*100,"% of the splits are below the maximum value")) )
+    
+    names(results_splits_runs) <- compar_names
+    output_tree_parameters[[3]] <- results_splits_runs
+    
   }
   
   
-  #########################################################
+  ######################################################### 
   ## IF WE HAVE LOG FILES, WE CHECK THE CONTINUOUS PARAM ##
   #########################################################
   
   if( length(my_runs[[1]]$ptable) > 0 ){ 
     
-    # check if min ESS is achieved for all cont parameters
-    min_ess <- minESS(percent)
-    ess_runs <- essContParam(my_runs, namesToExclude)
+    ## ESS ##
     
+    ess_runs_cont_param <- essContParam(my_runs)
+    ess_runs_cont_param <- ess_runs_cont_param - minimumESS
     
-    for (i in 1:length(ess_runs)) {
-      for (j in 1:length(ess_runs[[1]])) {
-        if (ess_runs[[i]][j] < min_ess){
-          names_ess <- c(names_ess, (rownames(ess_runs)[j]))
-        }
-      }
-    }
+    output_continuous_parameters[[1]] <- ess_runs_cont_param
     
-    if (length(names_ess)>0){
-      final_output <- c(final_output, (paste("This parameters have ESS below", min_ess, ":")) )
-      final_output <- c(final_output, unique(names_ess))
-      #print(paste("This parameters have ESS below", min_ess, ":"))
-      #print(unique(names_ess))
-    }
-    else{
-      final_output <- c(final_output, paste("All parameters have ess above", min_ess) )
-    }
+    ## Compare windows ##
     
+    ## KS score ##
+    ks_windows <- ksTest(my_runs, windows = TRUE)
+    ess_windows <- essContParam(my_runs, windows = T)
     
-    # check psrf between runs
-    psrf_runs <- psrfContParams(my_runs, namesToExclude = namesToExclude)
-    
-    for (i in 1:(length(psrf_runs[[1]])/2)) {
-      if( psrf_runs[[1]][i] > max_psrf){
-        name_psrf <- c(name_psrf, (rownames(psrf_runs[[1]])[i]))
-      }
-    }
-    
-    if (length(name_psrf)>0){
-      final_output <- c(final_output, (paste("This parameters have PSRF above", max_psrf, ":")) )
-      final_output <- c(final_output, name_psrf)
-      #print("The following parameters failed in PSRF:")
-      #print(name_psrf)
-    }
-    else{
-      final_output <- c(final_output,(paste("PSRF values are below", max_psrf)) )
-      #print(paste("PSRF values are below", max_psrf))
-    }
-    
-    all_df <- vector("list", length = 0)
-    
+    ks_limits_windows <-vector()
     for (i in 1:length(my_runs)) {
-      #get the cont_param for each run
-      all_df[[i]] <- getInfo(my_runs, i, namesToExclude)
+      ess_runs <- ess_windows[grep(paste("Run",i), rownames(ess_windows)),]
+      for (j in 1:ncol(ess_runs)) {
+        ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, ess_runs[1,j], ess_runs[2,j]))
+      }
+    }
+    ks_limits_windows <- data.frame(matrix(unlist(ks_limits_windows), nrow = length(my_runs), byrow = T), stringsAsFactors = F)
+    colnames(ks_limits_windows) <- names(ks_windows)
+    for (i in 1:length(my_runs)) {
+      rownames(ks_limits_windows)[i] <- paste("Run", i)
     }
     
-    for (df1 in 1:(length(all_df)-1)){
-      for (i in 1:length(all_df[[df1]])) {
-        # ks_result <-c( ks_result, (ks.test(all_df[[df1]][[i]], all_df[[df1+1]][[i]])))
-        ks_result <- ks.test( all_df[[df1]][[i]] , all_df[[df1+1]][[i]] )
-        
-        if( (ks_result$p.value) < 0.05 ){
-          final_output <- c(final_output, ( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) ) )
-          #print( paste( (colnames(all_df[[df1]])[i]) ,"failed K-S test" ) )
+    ks_windows <- ks_limits_windows - ks_windows
+    
+    output_continuous_parameters[[2]] <- ks_windows
+    
+    ## Compare runs ##
+    
+    ks_runs <- ksTest(my_runs, windows = F)
+    ess_runs <- essContParam(my_runs, windows = F)
+    
+    ks_limits <-vector()
+    count<-0
+    for (df1 in 1:(length(my_runs)-1)){
+      for (df2 in (df1+1):length(my_runs)) {
+        for (i in 1:nrow(ess_runs)) {
+          ks_limits <- c(ks_limits, ksThreshold(1.95, ess_runs[i,df1], ess_runs[i,df2]))
+        }
+        count <- count+1
+      }
+    }
+    ks_limits <- data.frame(matrix(unlist(ks_limits), nrow = count, byrow = T), stringsAsFactors = F)
+    
+    colnames(ks_limits) <- names(ks_runs)
+    
+    ks_runs <- ks_limits - ks_runs
+    
+    rownames(ks_runs) <- compar_names
+    
+    output_continuous_parameters[[3]] <- ks_runs
+
+  }
+  
+  ##################### 
+  ## DECISION MAKING ##
+  #####################
+  
+  decision_list_trees <- list()
+  decision_list_cont <- list()
+  fails <- list()
+  count_decision <- 0
+  
+  
+  ##### ONLY TREE FILES #####
+  
+  # Check ess_runs_splits, results_splits, results_splits_runs
+  if( length(my_runs[[1]]$trees) > 0 ){
+    
+    ess_splits <- list()
+    split_freq_windows <- list()
+    split_freq_runs <- list()
+    
+    ## ESS ##
+    for (i in 1:length(output_tree_parameters[[1]])) {
+      ess_splits[[i]] <- which(output_tree_parameters[[1]][[i]] < 0)
+    }
+    names(ess_splits) <- names(output_tree_parameters[[1]])
+    
+    for (i in 1:length(output_tree_parameters[[2]])) {
+      split_freq_windows[[i]] <- which(output_tree_parameters[[2]][[i]] < 0)
+    }
+    names(split_freq_windows) <- names(output_tree_parameters[[2]])
+    
+    for (i in 1:length(output_tree_parameters[[3]])) {
+      split_freq_runs[[i]] <- which(output_tree_parameters[[3]][[i]] < 0)
+    }
+    names(split_freq_runs) <- names(output_tree_parameters[[3]])
+    
+    decision_list_trees[[1]] <- ess_splits
+    decision_list_trees[[2]] <- split_freq_windows
+    decision_list_trees[[3]] <- split_freq_runs
+    
+    for (i in 1:length(decision_list_trees)) {
+      for (j in 1:length(decision_list_trees[[i]])) {
+        if( length(decision_list_trees[[i]][[j]]) > 0){
+          count_decision <- count_decision + 1
+          fails <- c(fails,decision_list_trees[[i]][j])
         }
       }
     }
+    
   }
+  
+  ##### ONLY LOG FILES #####
+  
+  # Check ess_runs_cont_param, ks_windows, ks_runs
+  if( length(my_runs[[1]]$ptable) > 0 ){
+    
+    decision_list_cont[[1]] <- which(output_continuous_parameters[[1]] < 0)
+    
+    decision_list_cont[[2]] <- which(output_continuous_parameters[[2]] < 0)
+    
+    decision_list_cont[[3]] <- which(output_continuous_parameters[[3]] < 0)
+    
+    for (i in 1:length(decision_list_cont)) {
+      if( length(decision_list_cont[[i]]) == 0 ){
+        count_decision <- count_decision + 1
+        fails <- c(fails, decision_list_cont[[i]])
+      }
+    }
+    
+  }
+  if(count_decision == 0){
+    final_output[[1]] <- "Achieved convergence"
+  }else{
+    final_output[[1]] <- "Failed convergence"
+    final_output[[2]] <- fails
+  }
+  
+  final_output <- c(final_output, output_continuous_parameters)
+  final_output <- c(final_output, output_tree_parameters)
   
   return(final_output)
 }

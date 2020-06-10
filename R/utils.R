@@ -36,9 +36,9 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   
   clades <-  prop.part(x)
   
-  if(!rooted){
-    clades <- postprocess.prop.part(clades)
-  }
+  #if(!rooted){
+  #  clades <- postprocess.prop.part(clades)
+  #}
   
   # recover()
   
@@ -57,14 +57,170 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
     cladenames[i] <- paste(sorted_taxa, collapse=" ")
   }
   
+  cladenames_post <- vector()
+  cladefreqs_post <- vector()
+  for (i in 1:length(cladenames)) {
+    if( cladefreqs[i] <= 0.99 & cladefreqs[i] >= 0.01 ){
+      cladenames_post <- c(cladenames_post, cladenames[i])
+      cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
+    }
+  }
+  
+  clade.df <- data.frame(cladenames_post, cladefreqs_post)
+  
+  return(clade.df)
+}
+
+clade.freq.tree <- function (x, rooted=FALSE, ...) {
+  
+  clades <-  prop.part(x)
+  
+  #if(!rooted){
+  #  clades <- postprocess.prop.part(clades)
+  #}
+  
+  cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
+  
+  tiplabels <- as.character(x$tip.label)
+  
+  cladenames <- rep(NA, length(clades))
+  
+  for(i in 1:length(clades)){
+    taxa_indices <- clades[[i]]
+    taxa <- tiplabels[taxa_indices]
+    sorted_taxa <- sort(taxa)
+    cladenames[i] <- paste(sorted_taxa, collapse=" ")
+  }
+  
+  #cladenames_post <- vector()
+  #cladefreqs_post <- vector()
+  #for (i in 1:length(cladenames)) {
+  #  if( cladefreqs[i] <= 0.99 & cladefreqs[i] >= 0.01 ){
+  #    cladenames_post <- c(cladenames_post, cladenames[i])
+  #    cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
+  #  }
+  #}
+  
+  #clade.df <- data.frame(cladenames_post, cladefreqs_post)
   clade.df <- data.frame(cladenames, cladefreqs)
   
   return(clade.df)
 }
 
-# Calculates min ESS according to the std error of the mean
-minESS <- function(per){
-  return((1/(per*4))^2)
+clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
+  
+  if(class(x) == "rwty.chain"){
+    x <- x$trees
+  }
+  
+  if (length(x) == 1 && class(x[[1]]) == "multiPhylo"){
+    x <- x[[1]]
+  }
+  
+  x <- x[start:end]
+  
+  clades <-  prop.part(x)
+  
+  cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
+  
+  clade_frequencies <- cladefreqs/length(x)
+  
+  tiplabels <- as.character(x[[1]]$tip.label)
+  
+  cladenames <- rep(NA, length(clades))
+  
+  for(i in 1:length(clades)){
+    taxa_indices <- clades[[i]]
+    taxa <- tiplabels[taxa_indices]
+    sorted_taxa <- sort(taxa)
+    cladenames[i] <- paste(sorted_taxa, collapse=" ")
+  }
+  
+  cladenames_post <- vector()
+  cladefreqs_post <- vector()
+  for (i in 1:length(cladenames)) {
+    if(  clade_frequencies[i] <= 0.99 &  clade_frequencies[i] >= 0.01 ){
+      cladenames_post <- c(cladenames_post, cladenames[i])
+      cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
+    }
+  }
+  
+  clade.df <- data.frame(cladenames_post, cladefreqs_post)
+  
+  return(clade.df)
+}
+
+# Function to calculate ESS according to Tracer
+essTracer <- function(input,stepSize = 1){
+  
+  samples <- length(input)
+  
+  max_lag <- 2000
+  max_lag <- min( (samples-1) , max_lag)
+  gammaSt <- replicate(max_lag, 0)
+  varStat <- 0
+  
+  i = 1 
+  
+  while (i <= max_lag) {
+    
+    for (j in 1:(samples-i+1)) {
+      del1 <- input[j] - mean(input)
+      del2 <- input[j+i-1] -mean(input)
+      gammaSt[i] <- gammaSt[i] + (del1*del2)
+    }
+    
+    gammaSt[i] <- gammaSt[i] / (samples - i + 1)
+    
+    if(i == 1){
+      varStat <- gammaSt[1]
+      
+    } else if( i %% 2 == 1){
+      
+      if( (gammaSt[i-1]+ gammaSt[i]) > 0 ){
+        varStat <- varStat + 2 * (gammaSt[i-1]+gammaSt[i])
+      }
+      else{
+        max_lag <- i
+      }
+      
+    }
+    i = i+1
+  }
+  
+  act <- 0
+  ess <- 0
+  
+  if (gammaSt[1] == 0){
+    act <-0
+  } else {
+    act <- stepSize * varStat / gammaSt[1]
+  }
+  
+  if (act ==0){
+    ess <-1
+  } else {
+    ess <- (stepSize*samples) / act
+  }
+  
+  return(ess)
+}
+
+# Calculates expected difference for splits frequencies
+expectedDiffSplits <- function(ess){
+  
+  prob <- vector()
+  expDiff <- vector()
+  for (p in 1:9999/10000) {
+    exp_diff <- 0
+    
+    for (i in 0:ess) {
+      exp_diff <- exp_diff + abs(i/ess-p)*dbinom(i,size=ess,prob=p)
+    }
+    prob <- c(prob, p)
+    expDiff <- c(expDiff, exp_diff)
+  }
+  return(rbind(prob,expDiff))
 }
 
 # Get the continuous parameters or the trees of a list of rwty.trees, returns a dataframe
@@ -113,6 +269,16 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
       return(all_wind)
     }
   }
+}
+
+# Calculates the threshold for the KS test
+ksThreshold <- function(alpha, ess1, ess2){
+  return( (alpha*sqrt((ess1+ess2)/(ess1*ess2))) )
+}
+
+# Calculates min ESS according to the std error of the mean
+minESS <- function(per){
+  return((1/(per*4))^2)
 }
 
 # Calculates the 2.5 and 97.5 quantiles of a dataframe
