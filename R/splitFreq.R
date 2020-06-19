@@ -111,4 +111,3 @@ splitFreq <- function(runs, windows=FALSE){
   return(listAll)
   
 }
-

@@ -1,6 +1,26 @@
 # For the naive user
 
-checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclude = "br_lens|bl|Iteration|Likelihood|Posterior|Prior"){
+checkConvergence <- function(path, control){
+  
+  ##### First let's check the function arguments #####
+  if ( is.null(control$precision) ){
+    precision <- 0.01
+  } else {
+    precision <- control$precision
+  }
+  
+  if ( is.null(control$burnin) ){
+    burnin <- 0.1
+  } else {
+    burnin <- control$burnin
+  }
+  
+  if ( is.null(control$namesToExclude) ){
+    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior"
+  } else {
+    namesToExclude <- control$namesToExclude
+  }
+  #####
   
   final_output <- list()
   
@@ -13,7 +33,7 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
   compar_names <- vector()
   for (r1 in 1:(length(my_runs)-1)) {
     for (r2 in (r1+1):length(my_runs)) {
-      compar_names <- c(compar_names, paste("Run", r1, "&", "Run", r2))
+      compar_names <- c(compar_names, paste("Run", r1, "_Run", r2, sep = ""))
     }
   }
   
@@ -27,6 +47,8 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
   
   if( length(my_runs[[1]]$trees) > 0 ){ # if we have tree files, we check split freq and ESS of splits
     
+    print("Analyzing tree parameters")
+    
     ## ESS ##
     
     ess_runs_splits <- essSplitFreq(my_runs)
@@ -35,7 +57,7 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
       ess_runs_splits[[i]] <- ess_runs_splits[[i]] - minimumESS
     }
     
-    output_tree_parameters[[1]] <- ess_runs_splits
+    output_tree_parameters$ess <- ess_runs_splits
     
     ## Compare windows ##
     
@@ -44,7 +66,7 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     exp_diff_windows <- expectedDiffSplits(100)
     
     for (i in 1:ncol(splits_windows)) {
-      splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 4)
+      splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 2)
     }
     
     results_splits <- list()
@@ -66,10 +88,10 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
       names(results_splits[[i]]) <- vecNames
     }
     for (i in 1:length(results_splits)) {
-      names(results_splits)[i] <- paste("Run", i)
+      names(results_splits)[i] <- paste("Run_", i, sep = "")
     }
     
-    output_tree_parameters[[2]] <- results_splits
+    output_tree_parameters$compare_windows <- results_splits
     
     
     ## Compare runs ##
@@ -79,7 +101,7 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     exp_diff_runs <- expectedDiffSplits(minimumESS)
     
     for (i in 1:ncol(splits_runs)) {
-      splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 4)
+      splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
     }
     
     results_splits_runs <- list()
@@ -101,9 +123,10 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     }
     
     names(results_splits_runs) <- compar_names
-    output_tree_parameters[[3]] <- results_splits_runs
+    output_tree_parameters$compare_runs <- results_splits_runs
     
   }
+  
   
   
   ######################################################### 
@@ -112,12 +135,14 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
   
   if( length(my_runs[[1]]$ptable) > 0 ){ 
     
+    print("Analyzing continuous parameters")
+    
     ## ESS ##
     
     ess_runs_cont_param <- essContParam(my_runs)
     ess_runs_cont_param <- ess_runs_cont_param - minimumESS
     
-    output_continuous_parameters[[1]] <- ess_runs_cont_param
+    output_continuous_parameters$ess <- ess_runs_cont_param
     
     ## Compare windows ##
     
@@ -127,7 +152,7 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     
     ks_limits_windows <-vector()
     for (i in 1:length(my_runs)) {
-      ess_runs <- ess_windows[grep(paste("Run",i), rownames(ess_windows)),]
+      ess_runs <- ess_windows[grep(paste("Run_",i, sep = ""), rownames(ess_windows)),]
       for (j in 1:ncol(ess_runs)) {
         ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, ess_runs[1,j], ess_runs[2,j]))
       }
@@ -135,12 +160,12 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     ks_limits_windows <- data.frame(matrix(unlist(ks_limits_windows), nrow = length(my_runs), byrow = T), stringsAsFactors = F)
     colnames(ks_limits_windows) <- names(ks_windows)
     for (i in 1:length(my_runs)) {
-      rownames(ks_limits_windows)[i] <- paste("Run", i)
+      rownames(ks_limits_windows)[i] <- paste("Run_", i, sep = "")
     }
     
     ks_windows <- ks_limits_windows - ks_windows
     
-    output_continuous_parameters[[2]] <- ks_windows
+    output_continuous_parameters$compare_windows <- ks_windows
     
     ## Compare runs ##
     
@@ -165,9 +190,10 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     
     rownames(ks_runs) <- compar_names
     
-    output_continuous_parameters[[3]] <- ks_runs
+    output_continuous_parameters$compare_runs <- ks_runs
 
   }
+  
   
   ##################### 
   ## DECISION MAKING ##
@@ -231,7 +257,7 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     decision_list_cont[[3]] <- which(output_continuous_parameters[[3]] < 0)
     
     for (i in 1:length(decision_list_cont)) {
-      if( length(decision_list_cont[[i]]) == 0 ){
+      if( length(decision_list_cont[[i]]) > 0 ){
         count_decision <- count_decision + 1
         fails <- c(fails, decision_list_cont[[i]])
       }
@@ -239,15 +265,21 @@ checkConvergence <- function(path, burnin = 0.1, precision = 0.01, namesToExclud
     
   }
   if(count_decision == 0){
-    final_output[[1]] <- "Achieved convergence"
+    final_output$message <- "Achieved convergence"
   }else{
-    final_output[[1]] <- "Failed convergence"
-    final_output[[2]] <- fails
+    final_output$message <- "Failed convergence"
+    final_output$failed <- fails
   }
   
-  final_output <- c(final_output, output_continuous_parameters)
-  final_output <- c(final_output, output_tree_parameters)
+  class(output_continuous_parameters) <- "convenience.diag"
+  class(output_tree_parameters) <- "convenience.diag"
   
-  return(final_output)
+  final_output$continuous_parameters <- output_continuous_parameters
+  final_output$tree_parameters <- output_tree_parameters
+  
+  
+  class(final_output) <- "convenience.diag"
+  
+  final_output
 }
 

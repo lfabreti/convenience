@@ -150,6 +150,9 @@ clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
   return(clade.df)
 }
 
+control <- vector(mode = "list", length = 3)
+names(control) <- c("burnin", "precision", "namesToExclude")
+
 # Function to calculate ESS according to Tracer
 essTracer <- function(input,stepSize = 1){
   
@@ -211,11 +214,14 @@ expectedDiffSplits <- function(ess){
   
   prob <- vector()
   expDiff <- vector()
-  for (p in 1:9999/10000) {
+  for (p in 1:99/100) {
     exp_diff <- 0
     
-    for (i in 0:ess) {
-      exp_diff <- exp_diff + abs(i/ess-p)*dbinom(i,size=ess,prob=p)
+    for (f1 in 0:ess) {
+      for (f2 in 0:ess) {
+        exp_diff <- exp_diff + abs( (f1/ess) - (f2/ess) ) * dbinom(f1, size = ess, prob = p) * dbinom(f2, size = ess, prob = p)
+        
+      }
     }
     prob <- c(prob, p)
     expDiff <- c(expDiff, exp_diff)
@@ -279,6 +285,10 @@ ksThreshold <- function(alpha, ess1, ess2){
 # Calculates min ESS according to the std error of the mean
 minESS <- function(per){
   return((1/(per*4))^2)
+}
+
+print.convenience.diag <- function(x){
+  print(summary(x))
 }
 
 # Calculates the 2.5 and 97.5 quantiles of a dataframe

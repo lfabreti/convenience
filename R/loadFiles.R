@@ -50,7 +50,7 @@ loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi"
     files <- list.files(path, pattern = "*trees")
     
     for(i in 1:length(files)){
-      all_vecs[[i]] <- paste("run_", i)
+      all_vecs[[i]] <- paste("run_", i, sep = "")
     }
     vec <- unlist(all_vecs)
     
@@ -110,15 +110,17 @@ loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi"
     }
   }
   
-  # Exclude continuous parameters that are fixed
-  for (i in 1:length(output)) {
-    for (j in 1:length(output[[i]]$ptable)) {
-      if( var(output[[i]]$ptable[j]) == 0 ){
-        output[[i]]$ptable[j] <- NULL
+  if ( length(output[[1]]$ptable) > 0 ){
+    # Exclude continuous parameters that are fixed
+    for (i in 1:length(output)) {
+      for (j in 1:length(output[[i]]$ptable)) {
+        if( var(output[[i]]$ptable[j]) == 0 ){
+          output[[i]]$ptable[j] <- NULL
+        }
       }
     }
-    
   }
+
   
   return(output)
   

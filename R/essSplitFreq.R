@@ -5,7 +5,7 @@ essSplitFreq <- function(runs){
   names_runs <- vector()
   for (z in 1:length(runs)) {
     x <- getInfo(runs, z, trees = TRUE)
-    names_runs <- c(names_runs, paste("Run", z))
+    names_runs <- c(names_runs, paste("Run_", z, sep = ""))
     clades.list <- list()
     
     for (j in 1:length(x)) {

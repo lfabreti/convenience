@@ -38,7 +38,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude = "bl|Iteration|Lik
     rownames(df_ess) <- name_param
     
     for (i in 1:ncol(df_ess)) {
-      colnames(df_ess)[i] <- paste("ESS run", i)
+      colnames(df_ess)[i] <- paste("ESS_run_", i, sep = "")
       
     }
   }
@@ -59,7 +59,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude = "bl|Iteration|Lik
     colnames(df_ess) <- name_param
     name_runs <- vector()
     for (i in 1:length(runs)) {
-      name_runs <- c(name_runs, paste("Run", i, " window 1"), paste("Run", i, " window 2") )
+      name_runs <- c(name_runs, paste("Run_", i, "_window_1",sep = ""), paste("Run_", i, "window_2", sep = "") )
     }
     rownames(df_ess) <- name_runs
   }
