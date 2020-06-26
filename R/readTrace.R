@@ -1,5 +1,5 @@
-# From RevGadgets
-
+#' Modified from RevGadgets
+#' 
 #' Read trace
 #'
 #' Reads in MCMC log files

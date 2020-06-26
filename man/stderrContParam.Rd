@@ -10,7 +10,9 @@ stderrContParam(
 )
 }
 \arguments{
-\item{namesToExlude}{}
+\item{runs}{A list of rwty.chain type}
+
+\item{namesToExlude}{Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior}
 }
 \value{
 

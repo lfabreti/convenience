@@ -14,21 +14,23 @@
 #' @export
 
 
-essContParam <- function(runs, windows=FALSE, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior") {
+essContParam <- function(runs, windows=FALSE, namesToExclude) {
 
   if(!windows){
     vecEss <- vector("list", length = 0)
     for (i in 1:length(runs)) {
       cont_param <- getInfo(runs, i, namesToExclude)
       
-      for (rows in 1:length(cont_param)) {
-        
-        if ( is.nan( ess(cont_param[[rows]]) ) ) {
-          print(paste(names(cont_param[rows]), " ess is not a number!"))
+      if ( typeof(cont_param) == "list" ){
+        for (rows in 1:length(cont_param)) {
+          
+          if ( is.nan( effectiveSize(cont_param[[rows]]) ) ) {
+            print(paste(names(cont_param[rows]), " ess is not a number!"))
+          }
         }
       }
       
-      vecEss <- c(vecEss, ess(cont_param))
+      vecEss <- c(vecEss, effectiveSize(cont_param))
     }
     
     n_param <- length(vecEss)/length(runs)

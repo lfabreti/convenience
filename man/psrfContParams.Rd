@@ -7,13 +7,14 @@
 psrfContParams(
   runs,
   windows = FALSE,
-  max = 1.01,
   conf_interval = 0.95,
   namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior"
 )
 }
 \arguments{
-\item{nameToExlude}{}
+\item{runs}{A list of rwty.chain type}
+
+\item{nameToExlude}{Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior}
 }
 \value{
 

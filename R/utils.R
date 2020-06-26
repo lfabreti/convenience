@@ -150,9 +150,6 @@ clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
   return(clade.df)
 }
 
-control <- vector(mode = "list", length = 3)
-names(control) <- c("burnin", "precision", "namesToExclude")
-
 # Function to calculate ESS according to Tracer
 essTracer <- function(input,stepSize = 1){
   
@@ -229,6 +226,51 @@ expectedDiffSplits <- function(ess){
   return(rbind(prob,expDiff))
 }
 
+# This function takes the name of a format and returns a list containing important info about file suffixes and whatnot
+get.format <- function(format){
+  
+  # Default behavior for MrBayes files
+  if(format == "mb"){
+    return(list(
+      trees.suffix = ".t",
+      log.suffix = ".p",
+      type = "nexus",
+      skip = 1
+    ))
+  }
+  
+  # Default behavior for *BEAST files
+  if(format == "*beast"){
+    return(list(
+      trees.suffix = ".species.trees",
+      log.suffix = ".log",
+      type = "nexus",
+      skip = 2
+    ))
+  }
+  
+  # Default behavior for BEAST files
+  if(format == "beast"){
+    return(list(
+      trees.suffix = ".trees",
+      log.suffix = ".log",
+      type = "nexus",
+      skip = 2
+    ))
+  }
+  
+  # Default behavior for revbayes files
+  if(format == "revbayes"){
+    return(list(
+      trees.suffix = ".trees",
+      log.suffix = ".log",
+      type = "revbayes",
+      skip = 0
+    ))
+  }
+  
+}
+
 # Get the continuous parameters or the trees of a list of rwty.trees, returns a dataframe
 getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows = FALSE){
   
@@ -236,23 +278,43 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
     cont_param <- all_runs[[run]]["ptable"]
     cont_param <- as.data.frame(all_runs[[run]]["ptable"])
     names(cont_param) <- gsub("ptable.","",names(cont_param),fixed=TRUE)
-    column <- grepl(pattern = namesToExclude, names(cont_param))
-    cont_param <- cont_param[,!column]
+    #column <- grepl(pattern = namesToExclude, names(cont_param))
+    #cont_param <- cont_param[,!column]
+    column <- grep(pattern = namesToExclude, names(cont_param), value = T)
+    cont_param <- cont_param[-match(column, names(cont_param))]
     if( !splitWindows ){
       return(cont_param)
     }
     else{
-      all_wind <- vector("list", length = 0)
-      len_run <- length(cont_param[[1]])
-      third <- (2*(0.2*len_run))
-      fourth <- (3*(0.2*len_run))
-      fifth <- (4*(0.2*len_run))
+      if( typeof(cont_param) == "list"){
+        all_wind <- vector("list", length = 0)
+        len_run <- length(cont_param[[1]])
+        third <- (2*(0.2*len_run))
+        fourth <- (3*(0.2*len_run))
+        fifth <- (4*(0.2*len_run))
+        
+        # gets the third window of the run
+        all_wind[[1]] <- as.data.frame(cont_param[third:fourth,])
+        names(all_wind[[1]]) <- names(cont_param)
+        #gets the fifth window of the run
+        all_wind[[2]] <- as.data.frame(cont_param[fifth:len_run,])
+        names(all_wind[[2]]) <- names(cont_param)
+        return(all_wind)
+      } 
       
-      # gets the third window of the run
-      all_wind[[1]] <- cont_param[third:fourth,]
-      #gets the fifth window of the run
-      all_wind[[2]] <- cont_param[fifth:len_run,]
-      return(all_wind)
+      else{
+        all_wind <- vector("list", length = 0)
+        len_run <- length(cont_param)
+        third <- (2*(0.2*len_run))
+        fourth <- (3*(0.2*len_run))
+        fifth <- (4*(0.2*len_run))
+        
+        # gets the third window of the run
+        all_wind[[1]] <- cont_param[third:fourth]
+        #gets the fifth window of the run
+        all_wind[[2]] <- cont_param[fifth:len_run]
+        return(all_wind)
+      }
     }
   }
   
@@ -282,18 +344,43 @@ ksThreshold <- function(alpha, ess1, ess2){
   return( (alpha*sqrt((ess1+ess2)/(ess1*ess2))) )
 }
 
+# Function to create control argument for checkConvergence
+makeControl <- function( burnin = NULL, precision = NULL, namesToExclude = NULL ){
+  control <- vector(mode = "list", length = 3)
+  control$burnin <- burnin
+  control$precision <- precision
+  control$namesToExclude <- namesToExclude
+  names(control) <- c("burnin", "precision", "namesToExclude")
+  return(control)
+}
+
 # Calculates min ESS according to the std error of the mean
 minESS <- function(per){
   return((1/(per*4))^2)
 }
 
-print.convenience.diag <- function(x){
-  print(summary(x))
-}
-
 # Calculates the 2.5 and 97.5 quantiles of a dataframe
 quants <- function(x){
   return(quantile(x,probs = c(0.025, 0.975)))
+}
+
+# From RWTY
+read.revbayestrees<-function(file) {
+  filelines<-readLines(file)
+    column.names<-strsplit(filelines[1], split="\t")[[1]]
+  data<-strsplit(filelines[-1], split="\t")
+  samplerow<-data[[1]]
+  treecheck<-unlist(lapply(samplerow, FUN=isTree))
+  param<-matrix(ncol=sum(!treecheck), nrow=length(data))
+  colnames(param)<-column.names[!treecheck]
+  for(i in 1:length(data))
+    param[i,]<-as.numeric(data[[i]][!treecheck])
+  tree<-list()
+  for(i in 1:length(data)) {
+    tree[[i]]<-read.tree(text=data[[i]][treecheck])
+  }
+  class(tree)<-"multiPhylo"
+  return(list(tree=tree, param=param))
 }
 
 # Calculate standard error

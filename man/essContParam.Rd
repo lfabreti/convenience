@@ -4,17 +4,15 @@
 \alias{essContParam}
 \title{ESS for the continuous parameters}
 \usage{
-essContParam(
-  runs,
-  miness = 200,
-  namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior"
-)
+essContParam(runs, windows = FALSE, namesToExclude)
 }
 \arguments{
-\item{namesToExclude}{}
+\item{runs}{A list of rwty.chain type}
+
+\item{namesToExclude}{Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior}
 }
 \value{
-blabla
+
 }
 \description{
 Calculates the Effective Sample Size for the continuous parameters

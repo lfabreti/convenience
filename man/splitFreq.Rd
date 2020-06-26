@@ -7,6 +7,8 @@
 splitFreq(runs, windows = FALSE)
 }
 \arguments{
+\item{runs}{A list of rwty.chain type}
+
 \item{windows}{}
 }
 \value{

@@ -17,44 +17,90 @@
 #' @export
 
 
-loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi", log_ext = "*.log", tree_ext="*.trees") {
+loadFiles <- function( path = NULL, list_files = NULL, format = "revbayes", burnin = 0.1, tree_name =  "psi", log_ext = "*.log", tree_ext="*.trees") {
   
   options(warn = -1)
   
   output <- list()
-  files <- list.files(path, recursive=F)
-  files <- files[ grepl("*run*|*joint*", files) ]
   
-  logFiles <- files[ grepl(log_ext, files) ]
-  treeFiles <- files[ grepl(tree_ext, files) ]
-  
+  if ( !is.null(path) ){
+    files <- list.files(path, recursive=F)
+    files <- files[ grepl("*run*|*joint*|*stone*", files) ]
+    
+    logFiles <- files[ grepl(log_ext, files) ]
+    treeFiles <- files[ grepl(tree_ext, files) ]
+  }else {
+    
+    # enforce argument matching
+    character_paths_are_strings <- is.character(list_files)
+    if ( any(character_paths_are_strings == FALSE) == TRUE ) {
+      # print out the ones that are not character strings
+      cat( "Some paths are not character strings:",
+           paste0("\t",paths[character_paths_are_strings == FALSE]), sep="\n")
+      stop()
+    }
+    
+    do_files_exist <- file.exists(list_files)
+    if ( any(do_files_exist == FALSE) == TRUE ) {
+      # print out paths to files that don't exist
+      cat( "Some files do not exist:",
+           paste0("\t",list_files[do_files_exist == FALSE]), sep="\n")
+      stop()
+    }
+    
+    logFiles <- list_files[ grepl(log_ext, list_files) ]
+    treeFiles <- list_files[ grepl(tree_ext, list_files) ]
+    
+  }
+
+  # No files
   if ( length(logFiles) == 0 & length(treeFiles) == 0 ){
     
     stop("No files to read")
   }
   
+  # Only log files
   else if ( length(logFiles) > 0 & length(treeFiles) == 0 ){
-    setwd(path)
-    output <- list()
-    for (i in 1:length(logFiles)){
+    
+    # path is provided
+    if(!is.null(path)){
+      setwd(path)
+      output <- list()
       
-      output[[i]] <- readTrace(logFiles[i], burnin = burnin)
+      for (i in 1:length(logFiles)){
+        
+        output[[i]] <- readTrace(logFiles[i], burnin = burnin)
+      }
+      setwd("..")
     }
-    setwd("..")
+    # list of files is provided
+    else{
+      output <- list()
+      
+      for (i in 1:length(logFiles)){
+        
+        output[[i]] <- readTrace(logFiles[i], burnin = burnin)
+      }
+    }
     
   }
   
+  # Log files and tree files
   else{
-    
+
     all_vecs <- vector("list", length = 0)
-    files <- list.files(path, pattern = "*trees")
     
-    for(i in 1:length(files)){
+    for(i in 1:length(treeFiles)){
       all_vecs[[i]] <- paste("run_", i, sep = "")
     }
     vec <- unlist(all_vecs)
     
-    output <- load.multi(path , format = format, labels=vec) # add burnin
+    if ( !is.null(path)){
+      output <- loadMulti(path , format = format, labels=vec)
+    }else {
+      output <- loadMulti( tree_files = treeFiles, log_files = logFiles, format = format, labels = vec)
+    }
+    
     
     # exclude combined files
     count_sizes <- vector("double", length=0)
@@ -66,12 +112,14 @@ loadFiles <- function( path, format="revbayes", burnin = 0.1, tree_name =  "psi"
     
     mean <- mean(count_sizes)
     
+    output_tmp <- output
+    
     for (i in 1:length(output)) {
       if( (length(output[[i]]$trees)) > mean ){
-        output <- output[-i]
+        output_tmp <- output[-i]
       }
-      
     }
+    output <- output_tmp
     
     #burnin
     if (burnin >= length(output[[1]]$trees)) stop("Burnin larger than iterations in file")

@@ -12,7 +12,7 @@
 #' @export
 
 
-ksTest <- function(runs, windows = FALSE, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior"){
+ksTest <- function(runs, windows = FALSE, namesToExclude){
   
   if(!windows){
     all_df <- vector("list", length = 0)
@@ -26,22 +26,33 @@ ksTest <- function(runs, windows = FALSE, namesToExclude = "bl|Iteration|Likelih
     vecAll <- vector("list", length = 0)
     count <- 0
     
-    for (df1 in 1:(length(all_df)-1)){
-      for (df2 in (df1+1):length(all_df)) {
-        vecKS <- vector()
-        
-        for (i in 1:length(all_df[[1]])) {
+    # In case there is only one continuous parameter
+    if( typeof(all_df[[1]]) == "double" ){
+      for (df1 in 1:(length(all_df)-1)) {
+        for (df2 in (df1+1):length(all_df)) {
           
-          ksTest <- ks.test( all_df[[df1]][[i]] , all_df[[df2]][[i]] )
-          vecKS <- c(vecKS, ksTest$statistic)
-          
+          ksTest <- ks.test( all_df[[df1]], all_df[[df2]])
+          vecAll <- c(vecAll, ksTest$statistic)
+          count <- count + 1
         }
-        #print(length(vecKS))
-        #print(vecKS)
-        vecAll <- c(vecAll, vecKS)
-        count <- count+1
+      }
+    } else {
+      for (df1 in 1:(length(all_df)-1)){
+        for (df2 in (df1+1):length(all_df)) {
+          vecKS <- vector()
+          
+          for (i in 1:length(all_df[[1]])) {
+            
+            ksTest <- ks.test( all_df[[df1]][[i]] , all_df[[df2]][[i]] )
+            vecKS <- c(vecKS, ksTest$statistic)
+            
+          }
+          vecAll <- c(vecAll, vecKS)
+          count <- count+1
+        }
       }
     }
+    
     
     df_ks <- data.frame(matrix(unlist(vecAll), nrow = count, byrow=T), stringsAsFactors = F)
     colnames(df_ks) <- names_parameters
@@ -58,12 +69,19 @@ ksTest <- function(runs, windows = FALSE, namesToExclude = "bl|Iteration|Likelih
       names_parameters <- names(cont_param[[1]])
       vecKS <- vector()
       
-      for (j in 1:length(cont_param[[1]])) {
-        ks_test <- ks.test( cont_param[[1]][[j]] , cont_param[[2]][[j]] )
-        vecKS <- c(vecKS, ks_test$statistic)
+      # In case there is only one continuous parameter
+      if ( typeof(cont_param[[1]]) == "double"){
+        ks_test <- ks.test( cont_param[[1]], cont_param[[2]])
+        vecAll <- c(vecAll, ks_test$statistic)
       }
-      vecAll <- c(vecAll, vecKS)
       
+      else{
+        for (j in 1:length(cont_param[[1]])) {
+          ks_test <- ks.test( cont_param[[1]][[j]] , cont_param[[2]][[j]] )
+          vecKS <- c(vecKS, ks_test$statistic)
+        }
+        vecAll <- c(vecAll, vecKS)
+      }
     }
     
     df_ks <- data.frame(matrix(unlist(vecAll), nrow = length(runs), byrow=T), stringsAsFactors = F)

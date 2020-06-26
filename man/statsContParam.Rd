@@ -11,14 +11,15 @@ statsContParam(
 )
 }
 \arguments{
-\item{namesToExclude}{}
+\item{runs}{A list of rwty.chain type}
+
+\item{windows}{A boolean to set if the calculations are in between windows of the same run, default = FALSE}
+
+\item{namesToExclude}{Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior}
 }
 \value{
-
+a list of data frames with the calculated values
 }
 \description{
 Calculates mean, median, standard deviation, 2.5% quantile and 97.5% quantile for all continuous parameters
-}
-\examples{
-
 }
