@@ -1,4 +1,14 @@
-# For the naive user
+#' Check Convergence
+#' 
+#' Check output from RevBayes for convergence diagnostics
+#' 
+#' @param path Path to directory containing all files from the same analysis
+#' @param list_files List of files to check for convergence
+#' @param control List of arguments to the function. Includes burn-in, precision and names of parameters to exclude from the analysis
+#' 
+#' @return List of type convenience.diag
+#' 
+#' @export
 
 checkConvergence <- function(path = NULL, list_files = NULL, control = makeControl()){
   

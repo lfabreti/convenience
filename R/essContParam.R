@@ -1,15 +1,12 @@
-# Calculate ess for the continuous parameters
-
 #' ESS for the continuous parameters
 #' 
 #' Calculates the Effective Sample Size for the continuous parameters
 #' 
 #' @param runs A list of rwty.chain type
-#' @param namesToExclude Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior
+#' @param windows A boolean to set if the calculation is within runs or between runs
+#' @param namesToExclude Column names to exclude from the calculations
 #' 
-#' @return
-#' 
-#' @example 
+#' @return A data-frame with ESS values
 #' 
 #' @export
 

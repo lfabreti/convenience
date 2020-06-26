@@ -1,11 +1,10 @@
+#' ESS for split frequencies
 #' 
-#' 
-#' 
+#' explain
 #' 
 #' @param 
-#' @param 
 #' 
-#' @return
+#' @return 
 #' 
 #' @example 
 #' 
