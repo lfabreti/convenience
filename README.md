@@ -20,7 +20,7 @@ The output parameters from a phylogenetic inference can be divided in 2 categori
 
  1. Phylogenetic tree parameters (discrete parameters);
  
- 2. Continuous parameters;
+ 2. Evolutionary model parameters (continuous parameters);
 
 The tree parameter we use in the convergence assessment is the frequency of splits (or bipartitions). The continuous parameters are the parameters from the evolutionary substitution model and the tree length.<br />
 The criteria for each type of parameter is described below:
