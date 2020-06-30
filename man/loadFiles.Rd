@@ -5,7 +5,8 @@
 \title{Load Files}
 \usage{
 loadFiles(
-  path,
+  path = NULL,
+  list_files = NULL,
   format = "revbayes",
   burnin = 0.1,
   tree_name = "psi",

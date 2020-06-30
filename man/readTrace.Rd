@@ -2,7 +2,7 @@
 % Please edit documentation in R/readTrace.R
 \name{readTrace}
 \alias{readTrace}
-\title{Read trace}
+\title{Modified from RevGadgets}
 \usage{
 readTrace(
   paths,
@@ -36,9 +36,11 @@ characters.}
 List of dataframes (of length 1 if only 1 log file provided).
 }
 \description{
-Reads in MCMC log files
+Read trace
 }
 \details{
+Reads in MCMC log files
+
 Reads in one or multiple MCMC log files from the same analysis
 and discards a user-specified burn-in, compatible with multiple monitor types.
 If the trace contains vectors of vectors and the user does not specify

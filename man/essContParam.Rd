@@ -9,14 +9,13 @@ essContParam(runs, windows = FALSE, namesToExclude)
 \arguments{
 \item{runs}{A list of rwty.chain type}
 
-\item{namesToExclude}{Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior}
+\item{windows}{A boolean to set if the calculation is within runs or between runs}
+
+\item{namesToExclude}{Column names to exclude from the calculations}
 }
 \value{
-
+A data-frame with ESS values
 }
 \description{
 Calculates the Effective Sample Size for the continuous parameters
-}
-\examples{
-
 }
