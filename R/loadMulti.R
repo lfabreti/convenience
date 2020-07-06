@@ -14,9 +14,7 @@
 #'
 #' @keywords Phylogenetics, MCMC, load, trees
 #'
-#' @export load.multi
-#' @examples
-#' #load.multi(path = "~/my trees/", format = "*beast")
+#' @export
 
 loadMulti <- function(path = NULL, tree_files = NULL, log_files = NULL, format = "revbayes", labels=NA, ...){
   

@@ -8,7 +8,7 @@
 #' 
 #' @example 
 #' 
-#' @export
+#' @export makeControl
 
 abc <- function(x, percent){
   return(sd(x)*4*percent)

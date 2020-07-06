@@ -10,6 +10,7 @@
 #' 
 #' @export
 
+
 checkConvergence <- function(path = NULL, list_files = NULL, control = makeControl()){
   
   ##### First let's check the function arguments #####
@@ -52,9 +53,13 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     }
   }
   
-  # list of results
+  # list of results - thresholds
   output_tree_parameters <- list()
   output_continuous_parameters <- list()
+  
+  # list of results
+  output_tree_parameters_raw <- list()
+  output_continuous_parameters_raw <- list()
   
   #################################################
   ## IF WE HAVE TREE FILES, WE CHECK THE SPLITS  ##
@@ -67,6 +72,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     ## ESS ##
     
     ess_runs_splits <- essSplitFreq(my_runs)
+    output_tree_parameters_raw$ess <- ess_runs_splits
     
     for (i in 1:length(ess_runs_splits)) {
       ess_runs_splits[[i]] <- ess_runs_splits[[i]] - minimumESS
@@ -83,6 +89,13 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     for (i in 1:ncol(splits_windows)) {
       splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 2)
     }
+    
+    col_names <- list()
+    for (i in 1:ncol(splits_windows)) {
+      col_names <- c(col_names, paste("Run_", i, sep = ""))
+    }
+    colnames(splits_windows) <- col_names
+    output_tree_parameters_raw$compare_windows <- splits_windows
     
     results_splits <- list()
     for (i in 1:ncol(splits_windows)) {
@@ -118,6 +131,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     for (i in 1:ncol(splits_runs)) {
       splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
     }
+    
+    colnames(splits_runs) <- compar_names
+    output_tree_parameters_raw$compare_runs <- splits_runs
     
     results_splits_runs <- list()
     for (i in 1:ncol(splits_runs)) {
@@ -155,8 +171,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     ## ESS ##
     
     ess_runs_cont_param <- essContParam(my_runs, namesToExclude = namesToExclude)
-    ess_runs_cont_param <- ess_runs_cont_param - minimumESS
+    output_continuous_parameters_raw$ess <- ess_runs_cont_param
     
+    ess_runs_cont_param <- ess_runs_cont_param - minimumESS
     output_continuous_parameters$ess <- ess_runs_cont_param
     
     ## Compare windows ##
@@ -182,6 +199,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       rownames(ks_windows)[i] <- paste("Run_", i, sep = "")
     }
     
+    output_continuous_parameters_raw$compare_windows <- ks_windows
     ks_windows <- ks_limits_windows - ks_windows
     
     output_continuous_parameters$compare_windows <- ks_windows
@@ -189,7 +207,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     ## Compare runs ##
     
     ks_runs <- ksTest(my_runs, windows = F, namesToExclude = namesToExclude)
-    
     
     ks_limits <-vector()
     count<-0
@@ -204,7 +221,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     ks_limits <- data.frame(matrix(unlist(ks_limits), nrow = count, byrow = T), stringsAsFactors = F)
     
     colnames(ks_limits) <- names(ks_runs)
+    rownames(ks_runs) <- compar_names
     
+    output_continuous_parameters_raw$compare_runs <- ks_runs
     ks_runs <- ks_limits - ks_runs
     
     rownames(ks_runs) <- compar_names
@@ -322,11 +341,11 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     final_output$failed <- fails
   }
   
-  class(output_continuous_parameters) <- "convenience.diag"
-  class(output_tree_parameters) <- "convenience.diag"
+  class(output_continuous_parameters_raw) <- "convenience.diag"
+  class(output_tree_parameters_raw) <- "convenience.diag"
   
-  final_output$continuous_parameters <- output_continuous_parameters
-  final_output$tree_parameters <- output_tree_parameters
+  final_output$continuous_parameters <- output_continuous_parameters_raw
+  final_output$tree_parameters <- output_tree_parameters_raw
   
   
   class(final_output) <- "convenience.diag"

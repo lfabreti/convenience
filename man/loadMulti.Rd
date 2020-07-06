@@ -33,9 +33,6 @@ Load all matching files from a directory or a list of files into a list of rwty.
 \details{
 Finds trees and log files based on format definition, returns rwty.chain objects containing both
 }
-\examples{
-#load.multi(path = "~/my trees/", format = "*beast")
-}
 \keyword{MCMC,}
 \keyword{Phylogenetics,}
 \keyword{load,}
