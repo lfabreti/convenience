@@ -41,7 +41,7 @@ essSplitFreq <- function(runs){
       
       vecNames <- c( vecNames, as.character(clades$cladenames_post))
       
-      ess_splits_coda <- c(ess_splits_coda, effectiveSize(is.split))
+      ess_splits_coda <- c(ess_splits_coda, essTracer(is.split))
     }
     listESS[[z]] <- ess_splits_coda
     names(listESS[[z]]) <- vecNames

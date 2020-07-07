@@ -46,12 +46,6 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   
   clades <-  prop.part(x)
   
-  #if(!rooted){
-  #  clades <- postprocess.prop.part(clades)
-  #}
-  
-  # recover()
-  
   cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
   
   cladefreqs <- cladefreqs/length(x)
@@ -70,7 +64,7 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   cladenames_post <- vector()
   cladefreqs_post <- vector()
   for (i in 1:length(cladenames)) {
-    if( cladefreqs[i] <= 0.99 & cladefreqs[i] >= 0.01 ){
+    if( cladefreqs[i] <= 0.9 & cladefreqs[i] >= 0.1 ){
       cladenames_post <- c(cladenames_post, cladenames[i])
       cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
     }
@@ -102,16 +96,6 @@ clade.freq.tree <- function (x, rooted=FALSE, ...) {
     cladenames[i] <- paste(sorted_taxa, collapse=" ")
   }
   
-  #cladenames_post <- vector()
-  #cladefreqs_post <- vector()
-  #for (i in 1:length(cladenames)) {
-  #  if( cladefreqs[i] <= 0.99 & cladefreqs[i] >= 0.01 ){
-  #    cladenames_post <- c(cladenames_post, cladenames[i])
-  #    cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
-  #  }
-  #}
-  
-  #clade.df <- data.frame(cladenames_post, cladefreqs_post)
   clade.df <- data.frame(cladenames, cladefreqs)
   
   return(clade.df)
@@ -149,7 +133,7 @@ clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
   cladenames_post <- vector()
   cladefreqs_post <- vector()
   for (i in 1:length(cladenames)) {
-    if(  clade_frequencies[i] <= 0.99 &  clade_frequencies[i] >= 0.01 ){
+    if(  clade_frequencies[i] <= 0.9 &  clade_frequencies[i] >= 0.1 ){
       cladenames_post <- c(cladenames_post, cladenames[i])
       cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
     }

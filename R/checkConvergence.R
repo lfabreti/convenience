@@ -45,11 +45,14 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   
   # calculating minimum ESS according to precision
   minimumESS <- minESS(precision)
+  minimumESS_windows <- round(minimumESS/5)
   
-  compar_names <- vector()
-  for (r1 in 1:(length(my_runs)-1)) {
-    for (r2 in (r1+1):length(my_runs)) {
-      compar_names <- c(compar_names, paste("Run", r1, "_Run_", r2, sep = ""))
+  if( length(my_runs) > 1 ){
+    compar_names <- vector()
+    for (r1 in 1:(length(my_runs)-1)) {
+      for (r2 in (r1+1):length(my_runs)) {
+        compar_names <- c(compar_names, paste("Run", r1, "_Run_", r2, sep = ""))
+      }
     }
   }
   
@@ -84,7 +87,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     splits_windows <- splitFreq(my_runs, windows = T)
     
-    exp_diff_windows <- expectedDiffSplits(100)
+    exp_diff_windows <- expectedDiffSplits(minimumESS_windows)
     
     for (i in 1:ncol(splits_windows)) {
       splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 2)
@@ -124,37 +127,39 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     ## Compare runs ##
     
-    splits_runs <- splitFreq(my_runs, windows = F)
-    
-    exp_diff_runs <- expectedDiffSplits(minimumESS)
-    
-    for (i in 1:ncol(splits_runs)) {
-      splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
-    }
-    
-    colnames(splits_runs) <- compar_names
-    output_tree_parameters_raw$compare_runs <- splits_runs
-    
-    results_splits_runs <- list()
-    for (i in 1:ncol(splits_runs)) {
-      results <- vector()
-      index <- which( exp_diff_runs[1,] %in% splits_runs[2,i]$listFrequencies )
-      vecNames <- vector()
+    if( length(my_runs) > 1 ){
+      splits_runs <- splitFreq(my_runs, windows = F)
       
-      for (j in index) {
-        for (z in 1:length(splits_runs[2,i]$listFrequencies)) {
-          if( exp_diff_runs[1,j] == splits_runs[2,i]$listFrequencies[z]){
-            results <- c(results, exp_diff_runs[2,j] - splits_runs[1,i]$listSplits[z])
-            vecNames <- c( vecNames, names(splits_runs[1,i]$listSplits[z]))
+      exp_diff_runs <- expectedDiffSplits(minimumESS)
+      
+      for (i in 1:ncol(splits_runs)) {
+        splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
+      }
+      
+      colnames(splits_runs) <- compar_names
+      output_tree_parameters_raw$compare_runs <- splits_runs
+      
+      results_splits_runs <- list()
+      for (i in 1:ncol(splits_runs)) {
+        results <- vector()
+        index <- which( exp_diff_runs[1,] %in% splits_runs[2,i]$listFrequencies )
+        vecNames <- vector()
+        
+        for (j in index) {
+          for (z in 1:length(splits_runs[2,i]$listFrequencies)) {
+            if( exp_diff_runs[1,j] == splits_runs[2,i]$listFrequencies[z]){
+              results <- c(results, exp_diff_runs[2,j] - splits_runs[1,i]$listSplits[z])
+              vecNames <- c( vecNames, names(splits_runs[1,i]$listSplits[z]))
+            }
           }
         }
+        results_splits_runs[[i]] <- results
+        names(results_splits_runs[[i]]) <- vecNames
       }
-      results_splits_runs[[i]] <- results
-      names(results_splits_runs[[i]]) <- vecNames
+      
+      names(results_splits_runs) <- compar_names
+      output_tree_parameters$compare_runs <- results_splits_runs
     }
-    
-    names(results_splits_runs) <- compar_names
-    output_tree_parameters$compare_runs <- results_splits_runs
     
   }
   
@@ -184,10 +189,10 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     ks_limits_windows <-vector()
     for (i in 1:length(my_runs)) {
       if (typeof(ks_windows) == "double"){
-        ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, 100, 100))
+        ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
       }else{
         for (j in 1:ncol(ks_windows)) {
-          ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, 100, 100))
+          ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
         }
       }
     }
@@ -206,29 +211,31 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     ## Compare runs ##
     
-    ks_runs <- ksTest(my_runs, windows = F, namesToExclude = namesToExclude)
-    
-    ks_limits <-vector()
-    count<-0
-    for (df1 in 1:(length(my_runs)-1)){
-      for (df2 in (df1+1):length(my_runs)) {
-        for (i in 1:ncol(ks_runs)) {
-          ks_limits <- c(ks_limits, ksThreshold(1.95,625, 625))
+    if( length(my_runs) > 1 ){
+      ks_runs <- ksTest(my_runs, windows = F, namesToExclude = namesToExclude)
+      
+      ks_limits <-vector()
+      count<-0
+      for (df1 in 1:(length(my_runs)-1)){
+        for (df2 in (df1+1):length(my_runs)) {
+          for (i in 1:ncol(ks_runs)) {
+            ks_limits <- c(ks_limits, ksThreshold(1.95,minimumESS, minimumESS))
+          }
+          count <- count+1
         }
-        count <- count+1
       }
+      ks_limits <- data.frame(matrix(unlist(ks_limits), nrow = count, byrow = T), stringsAsFactors = F)
+      
+      colnames(ks_limits) <- names(ks_runs)
+      rownames(ks_runs) <- compar_names
+      
+      output_continuous_parameters_raw$compare_runs <- ks_runs
+      ks_runs <- ks_limits - ks_runs
+      
+      rownames(ks_runs) <- compar_names
+      
+      output_continuous_parameters$compare_runs <- ks_runs
     }
-    ks_limits <- data.frame(matrix(unlist(ks_limits), nrow = count, byrow = T), stringsAsFactors = F)
-    
-    colnames(ks_limits) <- names(ks_runs)
-    rownames(ks_runs) <- compar_names
-    
-    output_continuous_parameters_raw$compare_runs <- ks_runs
-    ks_runs <- ks_limits - ks_runs
-    
-    rownames(ks_runs) <- compar_names
-    
-    output_continuous_parameters$compare_runs <- ks_runs
 
   }
   
@@ -258,20 +265,24 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       ess_splits[[i]] <- names(which(output_tree_parameters[[1]][[i]] < 0))
     }
     names(ess_splits) <- paste("ESS_of_", names(output_tree_parameters[[1]]), sep = "")
+    decision_list_trees[[1]] <- ess_splits
     
+    ## Windows ##
     for (i in 1:length(output_tree_parameters[[2]])) {
       split_freq_windows[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
     }
     names(split_freq_windows) <- paste("Windows_of_", names(output_tree_parameters[[2]]), sep = "")
-    
-    for (i in 1:length(output_tree_parameters[[3]])) {
-      split_freq_runs[[i]] <- names(which(output_tree_parameters[[3]][[i]] < 0))
-    }
-    names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[3]]), sep = "")
-    
-    decision_list_trees[[1]] <- ess_splits
     decision_list_trees[[2]] <- split_freq_windows
-    decision_list_trees[[3]] <- split_freq_runs
+    
+    ## Runs ##
+    if (length(my_runs)>1){
+      for (i in 1:length(output_tree_parameters[[3]])) {
+        split_freq_runs[[i]] <- names(which(output_tree_parameters[[3]][[i]] < 0))
+      }
+      names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[3]]), sep = "")
+      decision_list_trees[[3]] <- split_freq_runs
+    }
+
     
     for (i in 1:length(decision_list_trees)) {
       for (j in 1:length(decision_list_trees[[i]])) {
@@ -301,20 +312,22 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       ess_cont[[i]] <- row.names(output_continuous_parameters[[1]])[which(output_continuous_parameters[[1]][i] < 0 )]
     }
     names(ess_cont) <- names(output_continuous_parameters[[1]])
+    decision_list_cont[[1]] <- ess_cont
     
     for (i in 1:nrow(output_continuous_parameters[[2]])) {
       ks_windows[[i]] <- colnames(output_continuous_parameters[[2]])[which(output_continuous_parameters[[2]][i,] < 0)]
     }
     names(ks_windows) <- rownames(output_continuous_parameters[[2]])
-    
-    for (i in 1:nrow(output_continuous_parameters[[3]])) {
-      ks_runs[[i]] <- colnames(output_continuous_parameters[[3]])[which(output_continuous_parameters[[3]][i,] < 0)]
-    }
-    names(ks_runs) <- rownames(output_continuous_parameters[[3]])
-    
-    decision_list_cont[[1]] <- ess_cont
     decision_list_cont[[2]] <- ks_windows
-    decision_list_cont[[3]] <- ks_runs
+    
+    if( length(my_runs) > 1){
+      for (i in 1:nrow(output_continuous_parameters[[3]])) {
+        ks_runs[[i]] <- colnames(output_continuous_parameters[[3]])[which(output_continuous_parameters[[3]][i,] < 0)]
+      }
+      names(ks_runs) <- rownames(output_continuous_parameters[[3]])
+      decision_list_cont[[3]] <- ks_runs
+    }
+
 
     for (i in 1:length(decision_list_cont)) {
       for (j in 1:length(decision_list_cont[[i]])) {
