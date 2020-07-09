@@ -247,6 +247,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   decision_list_trees <- list()
   decision_list_cont <- list()
   fails <- list()
+  fails_names <- list()
   count_decision <- 0
   
   
@@ -263,9 +264,17 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     ## ESS ##
     for (i in 1:length(output_tree_parameters[[1]])) {
       ess_splits[[i]] <- names(which(output_tree_parameters[[1]][[i]] < 0))
+      ess_splits[[i]] <- output_tree_parameters_raw$ess[[i]][names(output_tree_parameters_raw$ess[[i]]) %in% ess_splits[[i]]]
     }
     names(ess_splits) <- paste("ESS_of_", names(output_tree_parameters[[1]]), sep = "")
     decision_list_trees[[1]] <- ess_splits
+    for (i in 1:length(decision_list_trees[[1]])) {
+      if( length(decision_list_trees[[1]][[i]]) > 0 ){
+        fails <- c(fails, paste(length(decision_list_trees[[1]][[i]]), "splits failed to reach", minimumESS, "for", names(decision_list_trees[[1]][i])))
+      }
+    }
+    
+    output_tree_parameters_raw$ess[[2]][which(ess_splits[[2]] == names(output_tree_parameters_raw$ess[[2]]))]
     
     ## Windows ##
     for (i in 1:length(output_tree_parameters[[2]])) {
@@ -273,6 +282,11 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     }
     names(split_freq_windows) <- paste("Windows_of_", names(output_tree_parameters[[2]]), sep = "")
     decision_list_trees[[2]] <- split_freq_windows
+    for (i in 1:length(decision_list_trees[[2]])) {
+      if ( length(decision_list_trees[[2]][[i]]) > 0 ){
+        fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between windows for", names(decision_list_trees[[2]][i])))
+      }
+    }
     
     ## Runs ##
     if (length(my_runs)>1){
@@ -281,6 +295,11 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       }
       names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[3]]), sep = "")
       decision_list_trees[[3]] <- split_freq_runs
+      for (i in 1:length(decision_list_trees[[3]])) {
+        if ( length(decision_list_trees[[3]][[i]]) > 0 ){
+          fails <- c(fails, paste(length(decision_list_trees[[3]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[3]][i])))
+        }
+      }
     }
 
     
@@ -293,7 +312,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       }
     }
     if (length(fails_tmp) > 0){
-      fails$tree_parameters <- fails_tmp
+      fails_names$tree_parameters <- fails_tmp
     }
     
   }
@@ -304,21 +323,35 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   if( length(my_runs[[1]]$ptable) > 0 ){
     
     ess_cont <- list()
+    ess_value <- list()
     ks_windows <- list()
     ks_runs <- list()
     fails_tmp <- list()
     
     for (i in 1:length(output_continuous_parameters[[1]])) {
       ess_cont[[i]] <- row.names(output_continuous_parameters[[1]])[which(output_continuous_parameters[[1]][i] < 0 )]
+      ess_value[[i]] <- output_continuous_parameters_raw$ess[ess_cont[[i]], i]
+      names(ess_value[[i]]) <- ess_cont[[i]]
     }
-    names(ess_cont) <- names(output_continuous_parameters[[1]])
-    decision_list_cont[[1]] <- ess_cont
+    names(ess_value) <- names(output_continuous_parameters[[1]])
+    decision_list_cont[[1]] <- ess_value
+    for (i in 1:length(decision_list_cont[[1]])) {
+      if( length(decision_list_cont[[1]][[i]]) > 0 ){
+        fails <- c(fails, paste(length(decision_list_cont[[1]][[i]]), "parameters failed to reach", minimumESS, "for", names(decision_list_cont[[1]][i])))
+      }
+    }
     
     for (i in 1:nrow(output_continuous_parameters[[2]])) {
       ks_windows[[i]] <- colnames(output_continuous_parameters[[2]])[which(output_continuous_parameters[[2]][i,] < 0)]
     }
     names(ks_windows) <- rownames(output_continuous_parameters[[2]])
     decision_list_cont[[2]] <- ks_windows
+    for (i in 1:length(decision_list_cont[[2]])) {
+      if ( length(decision_list_cont[[2]][[i]]) > 0 ){
+        fails <- c(fails, paste(length(decision_list_cont[[2]][[i]]), "parameters failed KS test between windows for", names(decision_list_cont[[2]][i])))
+      }
+    }
+    
     
     if( length(my_runs) > 1){
       for (i in 1:nrow(output_continuous_parameters[[3]])) {
@@ -327,6 +360,12 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       names(ks_runs) <- rownames(output_continuous_parameters[[3]])
       decision_list_cont[[3]] <- ks_runs
     }
+    for (i in 1:length(decision_list_cont[[3]])) {
+      if ( length(decision_list_cont[[3]][[i]]) > 0 ){
+        fails <- c(fails, paste(length(decision_list_cont[[3]][[i]]), "parameters failed KS test between runs for", names(decision_list_cont[[3]][i])))
+      }
+    }
+    
 
 
     for (i in 1:length(decision_list_cont)) {
@@ -339,11 +378,18 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     }
     
     if (length(fails_tmp) > 0){
-      fails$continuous_parameters <- fails_tmp
+      fails_names$continuous_parameters <- fails_tmp
     }
     
   }
   
+  if( length(fails) > 0 ){
+    tmp <- list()
+    for (i in 1:(length(fails)-1)) {
+      tmp <- paste(tmp,fails[i], "\n", fails[i+1], "\n")
+    }
+    fails <- tmp
+  }
   
   if(count_decision == 0){
     final_output$message <- "Achieved convergence"
@@ -352,6 +398,10 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     final_output$message <- "Failed convergence"
     final_output$converged <- FALSE
     final_output$failed <- fails
+    final_output$failed_names <- fails_names
+
+    class(final_output$failed) <- "list.fails"
+   
   }
   
   class(output_continuous_parameters_raw) <- "convenience.diag"
