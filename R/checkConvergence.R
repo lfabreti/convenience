@@ -37,7 +37,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   
   if ( !is.null(path)){
     # load the mcmc output
-    my_runs <- loadFiles(path, burnin, format = "revbayes")
+    my_runs <- loadFiles(path, burnin=burnin, format = "revbayes")
   }else {
     my_runs <- loadFiles(list_files = list_files, burnin = burnin, format = "revbayes")
   }
