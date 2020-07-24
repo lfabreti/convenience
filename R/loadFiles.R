@@ -17,7 +17,7 @@
 #' @export
 
 
-loadFiles <- function( path = NULL, list_files = NULL, format = "revbayes", burnin = 0.1, tree_name =  "psi", log_ext = "*.log", tree_ext="*.trees") {
+loadFiles <- function( path = NULL, list_files = NULL, format = "revbayes", burnin, tree_name =  "psi", log_ext = "*.log", tree_ext="*.trees") {
   
   options(warn = -1)
   

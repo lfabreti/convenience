@@ -8,7 +8,7 @@ loadFiles(
   path = NULL,
   list_files = NULL,
   format = "revbayes",
-  burnin = 0.1,
+  burnin,
   tree_name = "psi",
   log_ext = "*.log",
   tree_ext = "*.trees"
