@@ -65,7 +65,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format = "revbayes", burn
     # path is provided
     if(!is.null(path)){
       setwd(path)
-      output <- list()
+      #output <- list()
       
       for (i in 1:length(logFiles)){
         
@@ -158,19 +158,22 @@ loadFiles <- function( path = NULL, list_files = NULL, format = "revbayes", burn
     }
   }
   
+  
   if ( length(output[[1]]$ptable) > 0 ){
+    output_tmp <- output
     # Exclude continuous parameters that are fixed
     for (i in 1:length(output)) {
       for (j in 1:length(output[[i]]$ptable)) {
         if( var(output[[i]]$ptable[j]) == 0 ){
-          output[[i]]$ptable[j] <- NULL
+          #output[[i]]$ptable[j] <- NULL
+          output_tmp[[i]]$ptable[j] <- NULL
         }
       }
     }
+    output <- output_tmp
   }
 
   
   return(output)
   
 }
-
