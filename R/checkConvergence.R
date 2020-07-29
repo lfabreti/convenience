@@ -385,8 +385,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   
   if( length(fails) > 0 ){
     tmp <- list()
-    for (i in 1:(length(fails)-1)) {
-      tmp <- paste(tmp,fails[i], "\n", fails[i+1], "\n")
+    for (i in 1:(length(fails))) {
+      #tmp <- paste(tmp,fails[i], "\n", fails[i+1], "\n")
+      tmp <- paste(tmp,fails[i], "\n")
     }
     fails <- tmp
   }
