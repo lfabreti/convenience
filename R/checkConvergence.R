@@ -359,13 +359,13 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       }
       names(ks_runs) <- rownames(output_continuous_parameters[[3]])
       decision_list_cont[[3]] <- ks_runs
-    }
-    for (i in 1:length(decision_list_cont[[3]])) {
-      if ( length(decision_list_cont[[3]][[i]]) > 0 ){
-        fails <- c(fails, paste(length(decision_list_cont[[3]][[i]]), "parameters failed KS test between runs for", names(decision_list_cont[[3]][i])))
+      
+      for (i in 1:length(decision_list_cont[[3]])) {
+        if ( length(decision_list_cont[[3]][[i]]) > 0 ){
+          fails <- c(fails, paste(length(decision_list_cont[[3]][[i]]), "parameters failed KS test between runs for", names(decision_list_cont[[3]][i])))
+        }
       }
     }
-    
 
 
     for (i in 1:length(decision_list_cont)) {
