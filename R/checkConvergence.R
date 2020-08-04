@@ -274,8 +274,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       }
     }
     
-    output_tree_parameters_raw$ess[[2]][which(ess_splits[[2]] == names(output_tree_parameters_raw$ess[[2]]))]
-    
     ## Windows ##
     for (i in 1:length(output_tree_parameters[[2]])) {
       split_freq_windows[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
