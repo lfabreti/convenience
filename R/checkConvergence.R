@@ -35,26 +35,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   
   final_output <- list()
   
-  if ( !is.null(path)){
-    # load the mcmc output
-    my_runs <- loadFiles(path, burnin=burnin, format = "revbayes")
-  }else {
-    my_runs <- loadFiles(list_files = list_files, burnin = burnin, format = "revbayes")
-  }
-
-  
   # calculating minimum ESS according to precision
   minimumESS <- minESS(precision)
   minimumESS_windows <- round(minimumESS/5)
-  
-  if( length(my_runs) > 1 ){
-    compar_names <- vector()
-    for (r1 in 1:(length(my_runs)-1)) {
-      for (r2 in (r1+1):length(my_runs)) {
-        compar_names <- c(compar_names, paste("Run", r1, "_Run_", r2, sep = ""))
-      }
-    }
-  }
   
   # list of results - thresholds
   output_tree_parameters <- list()
@@ -63,6 +46,110 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   # list of results
   output_tree_parameters_raw <- list()
   output_continuous_parameters_raw <- list()
+  
+  
+  #####   BURN-IN   #####
+  print("Calculating burn-in")
+  while (burnin <= 0.5) {
+    
+    list_control <- 0 
+    
+    if ( !is.null(path)){
+      # load the mcmc output
+      my_runs <- loadFiles(path, burnin=burnin, format = "revbayes")
+    }else {
+      my_runs <- loadFiles(list_files = list_files, burnin = burnin, format = "revbayes")
+    }
+    
+    
+    # tree files #
+    if( length(my_runs[[1]]$trees) > 0 ){
+      
+      splits_windows <- splitFreq(my_runs, windows = T)
+      exp_diff_windows <- expectedDiffSplits(minimumESS_windows)
+      
+      for (i in 1:ncol(splits_windows)) {
+        splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 2)
+      }
+      
+      col_names <- list()
+      for (i in 1:ncol(splits_windows)) {
+        col_names <- c(col_names, paste("Run_", i, sep = ""))
+      }
+      colnames(splits_windows) <- col_names
+      output_tree_parameters_raw$compare_windows <- splits_windows
+      
+      results_splits <- list()
+      for (i in 1:ncol(splits_windows)) {
+        results <- vector()
+        # index gets the indexes sorted
+        index <- which( exp_diff_windows[1,] %in% splits_windows[2,i]$listFrequencies )
+        vecNames <- vector()
+        
+        for (j in index) {
+          for (z in 1:length(splits_windows[2,i]$listFrequencies)) {
+            if( exp_diff_windows[1,j] == splits_windows[2,i]$listFrequencies[z]){
+              results <- c(results, exp_diff_windows[2,j] - splits_windows[1,i]$listSplits[z])
+              vecNames <- c( vecNames, names(splits_windows[1,i]$listSplits[z]))
+            }
+          }
+        }
+        results_splits[[i]] <- results
+        names(results_splits[[i]]) <- vecNames
+      }
+      for (i in 1:length(results_splits)) {
+        names(results_splits)[i] <- paste("Run_", i, sep = "")
+      }
+      
+    }
+    
+    # log files #
+    if( length(my_runs[[1]]$ptable) > 0 ){
+      
+      ## KS score ##
+      ks_windows <- ksTest(my_runs, windows = TRUE, namesToExclude = namesToExclude)
+      
+      ks_limits_windows <-vector()
+      for (i in 1:length(my_runs)) {
+        if (typeof(ks_windows) == "double"){
+          ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
+        }else{
+          for (j in 1:ncol(ks_windows)) {
+            ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
+          }
+        }
+      }
+      
+      ks_limits_windows <- data.frame(matrix(unlist(ks_limits_windows), nrow = length(my_runs), byrow = T), stringsAsFactors = F)
+      colnames(ks_limits_windows) <- names(ks_windows)
+      for (i in 1:length(my_runs)) {
+        rownames(ks_limits_windows)[i] <- paste("Run_", i, sep = "")
+        rownames(ks_windows)[i] <- paste("Run_", i, sep = "")
+      }
+      
+      output_continuous_parameters_raw$compare_windows <- ks_windows
+      ks_windows <- ks_limits_windows - ks_windows
+    }
+    
+    for (i in 1:length(results_splits)) {
+      if( length(results_splits[[i]]) > 0 | ks_windows[i,] < 0) list_control <- list_control+1
+    }
+    
+    if(list_control > 0) burnin <- burnin + 0.1
+    else break
+    
+  }
+  if( burnin > 0.5 & list_control > 0) stop("Burn-in too large")
+  
+
+  if( length(my_runs) > 1 ){
+    compar_names <- vector()
+    for (r1 in 1:(length(my_runs)-1)) {
+      for (r2 in (r1+1):length(my_runs)) {
+        compar_names <- c(compar_names, paste("Run", r1, "_Run_", r2, sep = ""))
+      }
+    }
+  }
   
   #################################################
   ## IF WE HAVE TREE FILES, WE CHECK THE SPLITS  ##
@@ -84,43 +171,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     output_tree_parameters$ess <- ess_runs_splits
     
     ## Compare windows ##
-    
-    splits_windows <- splitFreq(my_runs, windows = T)
-    
-    exp_diff_windows <- expectedDiffSplits(minimumESS_windows)
-    
-    for (i in 1:ncol(splits_windows)) {
-      splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 2)
-    }
-    
-    col_names <- list()
-    for (i in 1:ncol(splits_windows)) {
-      col_names <- c(col_names, paste("Run_", i, sep = ""))
-    }
-    colnames(splits_windows) <- col_names
-    output_tree_parameters_raw$compare_windows <- splits_windows
-    
-    results_splits <- list()
-    for (i in 1:ncol(splits_windows)) {
-      results <- vector()
-      # index gets the indexes sorted
-      index <- which( exp_diff_windows[1,] %in% splits_windows[2,i]$listFrequencies )
-      vecNames <- vector()
-      
-      for (j in index) {
-        for (z in 1:length(splits_windows[2,i]$listFrequencies)) {
-          if( exp_diff_windows[1,j] == splits_windows[2,i]$listFrequencies[z]){
-            results <- c(results, exp_diff_windows[2,j] - splits_windows[1,i]$listSplits[z])
-            vecNames <- c( vecNames, names(splits_windows[1,i]$listSplits[z]))
-          }
-        }
-      }
-      results_splits[[i]] <- results
-      names(results_splits[[i]]) <- vecNames
-    }
-    for (i in 1:length(results_splits)) {
-      names(results_splits)[i] <- paste("Run_", i, sep = "")
-    }
     
     output_tree_parameters$compare_windows <- results_splits
     
@@ -182,30 +232,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     output_continuous_parameters$ess <- ess_runs_cont_param
     
     ## Compare windows ##
-    
-    ## KS score ##
-    ks_windows <- ksTest(my_runs, windows = TRUE, namesToExclude = namesToExclude)
-    
-    ks_limits_windows <-vector()
-    for (i in 1:length(my_runs)) {
-      if (typeof(ks_windows) == "double"){
-        ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
-      }else{
-        for (j in 1:ncol(ks_windows)) {
-          ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
-        }
-      }
-    }
-    
-    ks_limits_windows <- data.frame(matrix(unlist(ks_limits_windows), nrow = length(my_runs), byrow = T), stringsAsFactors = F)
-    colnames(ks_limits_windows) <- names(ks_windows)
-    for (i in 1:length(my_runs)) {
-      rownames(ks_limits_windows)[i] <- paste("Run_", i, sep = "")
-      rownames(ks_windows)[i] <- paste("Run_", i, sep = "")
-    }
-    
-    output_continuous_parameters_raw$compare_windows <- ks_windows
-    ks_windows <- ks_limits_windows - ks_windows
     
     output_continuous_parameters$compare_windows <- ks_windows
     
