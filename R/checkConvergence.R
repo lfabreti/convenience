@@ -21,7 +21,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   }
   
   if ( is.null(control$burnin) ){
-    burnin <- 0.1
+    burnin <- 0.0
   } else {
     burnin <- control$burnin
   }
