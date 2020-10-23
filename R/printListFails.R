@@ -1,14 +1,8 @@
-#' Print the list of fails
+#' Print method for list.fails
 #' 
-#' 
-#' @param 
-#' 
-#' @return 
-#' 
-#' @example 
+#' @param x A list of convenience.diag type
 #' 
 #' @export
-
 print.list.fails <- function(x){
   cat(x)
 }

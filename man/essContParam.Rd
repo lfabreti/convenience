@@ -2,9 +2,9 @@
 % Please edit documentation in R/essContParam.R
 \name{essContParam}
 \alias{essContParam}
-\title{ESS for the continuous parameters}
+\title{ESS calculation for the continuous parameters}
 \usage{
-essContParam(runs, windows = FALSE, namesToExclude)
+essContParam(runs, windows = FALSE, namesToExclude, tracer)
 }
 \arguments{
 \item{runs}{A list of rwty.chain type}
@@ -12,9 +12,11 @@ essContParam(runs, windows = FALSE, namesToExclude)
 \item{windows}{A boolean to set if the calculation is within runs or between runs}
 
 \item{namesToExclude}{Column names to exclude from the calculations}
+
+\item{tracer}{A boolean to determine if ESS should be calculated with Tracer method. If set to FALSE, ESS will be calculated with CODA}
 }
 \value{
-A data-frame with ESS values
+A data-frame with ESS values for the continuous parameters
 }
 \description{
 Calculates the Effective Sample Size for the continuous parameters

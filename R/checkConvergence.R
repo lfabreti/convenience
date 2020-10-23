@@ -1,19 +1,29 @@
-#' Check Convergence
+#' Check Convergence full assessment
 #' 
-#' Check output from RevBayes for convergence diagnostics
+#' Check output from phylogenetic MCMC analysis for convergence diagnostics
 #' 
 #' @param path Path to directory containing all files from the same analysis
 #' @param list_files List of files to check for convergence
-#' @param control List of arguments to the function. Includes burn-in, precision and names of parameters to exclude from the analysis
+#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"
+#' @param control List of arguments to the function. Includes tracer (to calculate the ESS with Tracer method), burn-in, precision and names of parameters to exclude from the analysis
 #' 
 #' @return List of type convenience.diag
+#' 
+#' @examples 
+#' checkConvergence( path = "example/4_runs" )
 #' 
 #' @export
 
 
-checkConvergence <- function(path = NULL, list_files = NULL, control = makeControl()){
+checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes", control = makeControl()){
   
   ##### First let's check the function arguments #####
+  if( is.null(control$tracer) ){
+    tracer <- FALSE
+  } else {
+    tracer <- control$tracer
+  }
+  
   if ( is.null(control$precision) ){
     precision <- 0.01
   } else {
@@ -27,7 +37,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   }
   
   if ( is.null(control$namesToExclude) ){
-    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior"
+    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood"
   } else {
     namesToExclude <- control$namesToExclude
   }
@@ -47,6 +57,13 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
   output_tree_parameters_raw <- list()
   output_continuous_parameters_raw <- list()
   
+  # Load MCMC output
+  if ( !is.null(path)){
+    # load the mcmc output
+    my_runs <- loadFiles(path, format = format)
+  }else {
+    my_runs <- loadFiles(list_files = list_files, format = format)
+  }
   
   #####   BURN-IN   #####
   print("Calculating burn-in")
@@ -54,19 +71,12 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     list_control <- 0 
     
-    if ( !is.null(path)){
-      # load the mcmc output
-      my_runs <- loadFiles(path, burnin=burnin, format = "revbayes")
-    }else {
-      my_runs <- loadFiles(list_files = list_files, burnin = burnin, format = "revbayes")
-    }
-    
-    
     # tree files #
     if( length(my_runs[[1]]$trees) > 0 ){
       
       splits_windows <- splitFreq(my_runs, windows = T)
-      exp_diff_windows <- expectedDiffSplits(minimumESS_windows)
+      if( minimumESS_windows == 125 ) exp_diff_windows <- convenience::exp_diff_windows
+      else exp_diff_windows <- expectedDiffSplits(minimumESS_windows)
       
       for (i in 1:ncol(splits_windows)) {
         splits_windows[2,i]$listFrequencies <- round(splits_windows[2,i]$listFrequencies, digits = 2)
@@ -77,7 +87,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
         col_names <- c(col_names, paste("Run_", i, sep = ""))
       }
       colnames(splits_windows) <- col_names
-      output_tree_parameters_raw$compare_windows <- splits_windows
+      
       
       results_splits <- list()
       for (i in 1:ncol(splits_windows)) {
@@ -127,21 +137,29 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
         rownames(ks_windows)[i] <- paste("Run_", i, sep = "")
       }
       
-      output_continuous_parameters_raw$compare_windows <- ks_windows
       ks_windows <- ks_limits_windows - ks_windows
     }
     
-    for (i in 1:length(results_splits)) {
-      if( length(results_splits[[i]]) > 0 | ks_windows[i,] < 0) list_control <- list_control+1
+    if( length(my_runs[[1]]$trees) > 0 & length(my_runs[[1]]$ptable) > 0 ){
+      for (i in 1:length(results_splits)) {
+        if( length(results_splits[[i]]) > 0 | ks_windows[i,] < 0) list_control <- list_control+1
+      }
+    } else if ( length(my_runs[[1]]$ptable) == 0){
+      for (i in 1:length(results_splits)) {
+        if( length(results_splits[[i]]) > 0 ) list_control <- list_control+1
+      }
     }
     
-    if(list_control > 0) burnin <- burnin + 0.1
+    if(list_control > 0){
+      burnin <- burnin + 0.1
+      my_runs <- removeBurnin(my_runs, burnin)
+    } 
     else break
     
   }
   if( burnin > 0.5 & list_control > 0) stop("Burn-in too large")
   
-
+  # Name runs
   if( length(my_runs) > 1 ){
     compar_names <- vector()
     for (r1 in 1:(length(my_runs)-1)) {
@@ -159,10 +177,19 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     print("Analyzing tree parameters")
     
+    ## Check splits with freq above 0.975 or below 0.025 ##
+    output_tree_parameters_raw$exclude_high <- check.clades.freq(my_runs, 0.975)
+    output_tree_parameters_raw$exclude_low <- check.clades.freq(my_runs, 0.025)
+    
+    ## Split frequency ##
+    
+    output_tree_parameters_raw$frequencies <- splitFreq(my_runs)
+    #output_tree_parameters_raw$frequencies <- output_tree_parameters_raw$frequencies[2,]
+    
     ## ESS ##
     
-    ess_runs_splits <- essSplitFreq(my_runs)
-    output_tree_parameters_raw$ess <- ess_runs_splits
+    ess_runs_splits <- essSplitFreq(my_runs, tracer)
+    output_tree_parameters_raw$ess <- as.data.frame(ess_runs_splits)
     
     for (i in 1:length(ess_runs_splits)) {
       ess_runs_splits[[i]] <- ess_runs_splits[[i]] - minimumESS
@@ -170,49 +197,47 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     output_tree_parameters$ess <- ess_runs_splits
     
-    ## Compare windows ##
-    
-    output_tree_parameters$compare_windows <- results_splits
-    
-    
     ## Compare runs ##
     
     if( length(my_runs) > 1 ){
       splits_runs <- splitFreq(my_runs, windows = F)
       
-      exp_diff_runs <- expectedDiffSplits(minimumESS)
-      
-      for (i in 1:ncol(splits_runs)) {
-        splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
-      }
-      
-      colnames(splits_runs) <- compar_names
-      output_tree_parameters_raw$compare_runs <- splits_runs
+      if( minimumESS == 625) exp_diff_runs <- convenience::exp_diff_runs 
+      else  exp_diff_runs <- expectedDiffSplits(minimumESS)
       
       results_splits_runs <- list()
-      for (i in 1:ncol(splits_runs)) {
-        results <- vector()
-        index <- which( exp_diff_runs[1,] %in% splits_runs[2,i]$listFrequencies )
-        vecNames <- vector()
+      if( length(splits_runs) > 0 ){
+        for (i in 1:ncol(splits_runs)) {
+          splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
+        }
         
-        for (j in index) {
-          for (z in 1:length(splits_runs[2,i]$listFrequencies)) {
-            if( exp_diff_runs[1,j] == splits_runs[2,i]$listFrequencies[z]){
-              results <- c(results, exp_diff_runs[2,j] - splits_runs[1,i]$listSplits[z])
-              vecNames <- c( vecNames, names(splits_runs[1,i]$listSplits[z]))
+        colnames(splits_runs) <- compar_names
+        output_tree_parameters_raw$compare_runs <- splits_runs
+        
+        for (i in 1:ncol(splits_runs)) {
+          results <- vector()
+          index <- which( exp_diff_runs[1,] %in% splits_runs[2,i]$listFrequencies )
+          vecNames <- vector()
+          
+          for (j in index) {
+            for (z in 1:length(splits_runs[2,i]$listFrequencies)) {
+              if( exp_diff_runs[1,j] == splits_runs[2,i]$listFrequencies[z]){
+                results <- c(results, exp_diff_runs[2,j] - splits_runs[1,i]$listSplits[z])
+                vecNames <- c( vecNames, names(splits_runs[1,i]$listSplits[z]))
+              }
             }
           }
+          results_splits_runs[[i]] <- results
+          names(results_splits_runs[[i]]) <- vecNames
         }
-        results_splits_runs[[i]] <- results
-        names(results_splits_runs[[i]]) <- vecNames
+        
+        names(results_splits_runs) <- compar_names
       }
       
-      names(results_splits_runs) <- compar_names
       output_tree_parameters$compare_runs <- results_splits_runs
     }
     
   }
-  
   
   
   ######################################################### 
@@ -223,17 +248,34 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     print("Analyzing continuous parameters")
     
+    ## Check parameters with var = 0 and exclude from convergence assessment ##
+    
+    param_names <- vector("list", length = length(my_runs))
+    for (i in 1:length(my_runs)) {
+      aux <- vector()
+      for ( j in 1:length(my_runs[[i]]$ptable) ) {
+        if( var(my_runs[[i]]$ptable[j]) == 0 ){
+          aux <- c(aux, j)
+        }
+      }
+      if (length(aux) > 0 ){
+        param_names[[i]] <- names(my_runs[[i]]$ptable[aux])
+        my_runs[[i]]$ptable <- my_runs[[i]]$ptable[,-aux]
+      }
+    }
+    output_continuous_parameters_raw$exclude <- param_names
+    
+    ## Means of continuous parameters ##
+    
+    output_continuous_parameters_raw$means <- meanContParam(my_runs, namesToExclude = namesToExclude)
+    
     ## ESS ##
     
-    ess_runs_cont_param <- essContParam(my_runs, namesToExclude = namesToExclude)
+    ess_runs_cont_param <- essContParam(my_runs, namesToExclude = namesToExclude, tracer = tracer)
     output_continuous_parameters_raw$ess <- ess_runs_cont_param
     
     ess_runs_cont_param <- ess_runs_cont_param - minimumESS
     output_continuous_parameters$ess <- ess_runs_cont_param
-    
-    ## Compare windows ##
-    
-    output_continuous_parameters$compare_windows <- ks_windows
     
     ## Compare runs ##
     
@@ -262,7 +304,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       
       output_continuous_parameters$compare_runs <- ks_runs
     }
-
+    
   }
   
   
@@ -289,46 +331,34 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
     ## ESS ##
     for (i in 1:length(output_tree_parameters[[1]])) {
-      ess_splits[[i]] <- names(which(output_tree_parameters[[1]][[i]] < 0))
-      ess_splits[[i]] <- output_tree_parameters_raw$ess[[i]][names(output_tree_parameters_raw$ess[[i]]) %in% ess_splits[[i]]]
+      if(length(output_tree_parameters[[1]][[i]])>0) ess_splits[[i]] <- names(which(output_tree_parameters[[1]][[i]] < 0))
+      if(length(output_tree_parameters[[1]][[i]])>0) ess_splits[[i]] <- output_tree_parameters_raw$ess[[i]][names(output_tree_parameters_raw$ess[[i]]) %in% ess_splits[[i]]]
     }
-    names(ess_splits) <- paste("ESS_of_", names(output_tree_parameters[[1]]), sep = "")
+    if(length(ess_splits) > 0) names(ess_splits) <- paste("ESS_of_", names(output_tree_parameters[[1]]), sep = "")
     decision_list_trees[[1]] <- ess_splits
-    for (i in 1:length(decision_list_trees[[1]])) {
+    if( length(decision_list_trees[[1]]) > 0 ) for (i in 1:length(decision_list_trees[[1]])) {
       if( length(decision_list_trees[[1]][[i]]) > 0 ){
         fails <- c(fails, paste(length(decision_list_trees[[1]][[i]]), "splits failed to reach", minimumESS, "for", names(decision_list_trees[[1]][i])))
       }
     }
     
-    ## Windows ##
-    for (i in 1:length(output_tree_parameters[[2]])) {
-      split_freq_windows[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
-    }
-    names(split_freq_windows) <- paste("Windows_of_", names(output_tree_parameters[[2]]), sep = "")
-    decision_list_trees[[2]] <- split_freq_windows
-    for (i in 1:length(decision_list_trees[[2]])) {
-      if ( length(decision_list_trees[[2]][[i]]) > 0 ){
-        fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between windows for", names(decision_list_trees[[2]][i])))
-      }
-    }
-    
     ## Runs ##
-    if (length(my_runs)>1){
-      for (i in 1:length(output_tree_parameters[[3]])) {
-        split_freq_runs[[i]] <- names(which(output_tree_parameters[[3]][[i]] < 0))
+    if (length(my_runs)>1 & length(output_tree_parameters_raw) > 3 ){
+      for (i in 1:length(output_tree_parameters[[2]])) {
+        split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
       }
-      names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[3]]), sep = "")
+      names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
       decision_list_trees[[3]] <- split_freq_runs
-      for (i in 1:length(decision_list_trees[[3]])) {
-        if ( length(decision_list_trees[[3]][[i]]) > 0 ){
-          fails <- c(fails, paste(length(decision_list_trees[[3]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[3]][i])))
+      for (i in 1:length(decision_list_trees[[2]])) {
+        if ( length(decision_list_trees[[2]][[i]]) > 0 ){
+          fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[2]][i])))
         }
       }
     }
-
+    
     
     for (i in 1:length(decision_list_trees)) {
-      for (j in 1:length(decision_list_trees[[i]])) {
+      if(length(decision_list_trees[[i]]) > 0 ) for (j in 1:length(decision_list_trees[[i]])) {
         if( length(decision_list_trees[[i]][[j]]) > 0){
           count_decision <- count_decision + 1
           fails_tmp <- c(fails_tmp,decision_list_trees[[i]][j])
@@ -365,33 +395,22 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
       }
     }
     
-    for (i in 1:nrow(output_continuous_parameters[[2]])) {
-      ks_windows[[i]] <- colnames(output_continuous_parameters[[2]])[which(output_continuous_parameters[[2]][i,] < 0)]
-    }
-    names(ks_windows) <- rownames(output_continuous_parameters[[2]])
-    decision_list_cont[[2]] <- ks_windows
-    for (i in 1:length(decision_list_cont[[2]])) {
-      if ( length(decision_list_cont[[2]][[i]]) > 0 ){
-        fails <- c(fails, paste(length(decision_list_cont[[2]][[i]]), "parameters failed KS test between windows for", names(decision_list_cont[[2]][i])))
-      }
-    }
-    
     
     if( length(my_runs) > 1){
-      for (i in 1:nrow(output_continuous_parameters[[3]])) {
-        ks_runs[[i]] <- colnames(output_continuous_parameters[[3]])[which(output_continuous_parameters[[3]][i,] < 0)]
+      for (i in 1:nrow(output_continuous_parameters[[2]])) {
+        ks_runs[[i]] <- colnames(output_continuous_parameters[[2]])[which(output_continuous_parameters[[2]][i,] < 0)]
       }
-      names(ks_runs) <- rownames(output_continuous_parameters[[3]])
-      decision_list_cont[[3]] <- ks_runs
+      names(ks_runs) <- rownames(output_continuous_parameters[[2]])
+      decision_list_cont[[2]] <- ks_runs
       
-      for (i in 1:length(decision_list_cont[[3]])) {
-        if ( length(decision_list_cont[[3]][[i]]) > 0 ){
-          fails <- c(fails, paste(length(decision_list_cont[[3]][[i]]), "parameters failed KS test between runs for", names(decision_list_cont[[3]][i])))
+      for (i in 1:length(decision_list_cont[[2]])) {
+        if ( length(decision_list_cont[[2]][[i]]) > 0 ){
+          fails <- c(fails, paste(length(decision_list_cont[[2]][[i]]), "parameters failed KS test between runs for", names(decision_list_cont[[2]][i])))
         }
       }
     }
-
-
+    
+    
     for (i in 1:length(decision_list_cont)) {
       for (j in 1:length(decision_list_cont[[i]])) {
         if( length(decision_list_cont[[i]][[j]]) > 0){
@@ -407,36 +426,143 @@ checkConvergence <- function(path = NULL, list_files = NULL, control = makeContr
     
   }
   
+  
+  ##### SUMMARIZING RESULTS #####
+  
+  message_list <- list()
+  if(count_decision == 0){
+    message_list <- paste(message_list, "ACHIEVED CONVERGENCE", "\n")
+    message_list <- paste(message_list, " \n")
+  }else{
+    message_list <- paste(message_list, "FAILED CONVERGENCE", "\n")
+    message_list <- paste(message_list, " \n")
+  } 
+  
+  message_list <- paste(message_list, "BURN-IN SET AT", burnin, "\n")
+  message_list <- paste(message_list, " \n")
+  
+  # reporting split with too high or too low frequency
+  if( length(my_runs[[1]]$trees) > 0 ){
+    if ( length(output_tree_parameters_raw$exclude_high[[1]]) > 0 ) message_list <- paste(message_list, "SPLITS EXCLUDED FROM CONVERGENCE ASSESSMENT \n")
+    for (i in 1:length(my_runs)) {
+      if ( length(output_tree_parameters_raw$exclude_high[[i]]) > 0 ) message_list <- paste(message_list, "FREQUENCY HIGHER THAN 0.975 FOR RUN", i, "\n")
+      if ( length(output_tree_parameters_raw$exclude_high[[i]]) > 0 ){
+        for (j in 1:length(output_tree_parameters_raw$exclude_high[[i]])) {
+          message_list <- paste(message_list, "    ", output_tree_parameters_raw$exclude_high[[i]][j], "\n")
+        }
+        message_list <- paste(message_list, " \n")
+      }
+      if ( length(output_tree_parameters_raw$exclude_low[[i]]) > 0 ) message_list <- paste(message_list, "FREQUENCY LOWER THAN 0.025 FOR RUN", i, "\n")
+      if ( length(output_tree_parameters_raw$exclude_low[[i]]) > 0 ){
+        for (j in 1:length(output_tree_parameters_raw$exclude_low[[i]])) {
+          message_list <- paste(message_list, "    ", output_tree_parameters_raw$exclude_low[[i]][j], "\n")
+        }
+        message_list <- paste(message_list, " \n")
+      }
+    }
+  }
+  
+  # reportin cont param with no variance
+  if( length(my_runs[[1]]$ptable) > 0 ){
+    if( length(output_continuous_parameters_raw$exclude[[1]]) > 0 ) message_list <- paste(message_list, "CONTINUOUS PARAMETERS WITH NO VARIANTION AND EXCLUDED FROM CONVERGENCE ASSESSMENT \n")
+    for (i in 1:length(my_runs)) {
+      if( length(output_continuous_parameters_raw$exclude[[i]]) > 0 ) message_list <- paste(message_list, "RUN", i, "\n")
+      if( length(output_continuous_parameters_raw$exclude[[i]]) > 0 ){
+        for (j in 1:length(output_continuous_parameters_raw$exclude[[i]])) {
+          message_list <- paste(message_list, "    ", output_continuous_parameters_raw$exclude[[i]][j], "\n")
+        }
+        message_list <- paste(message_list, " \n")
+      }
+    }
+  }
+  
+  # reporting split with lowest ESS
+  if( length(my_runs[[1]]$trees) > 0 ){
+    message_list <- paste(message_list, "LOWEST SPLIT ESS \n")
+    for (i in 1:length(my_runs)) {
+      message_list <- paste(message_list, "     RUN", i, "->", names(which.min(output_tree_parameters_raw$ess[[i]])), round(min(output_tree_parameters_raw$ess[[i]]), digits = 2), "\n")
+    }
+    message_list <- paste(message_list, " \n")
+  }
+  
+  # reporting cont param with lowest ESS
+  if( length(my_runs[[1]]$ptable) > 0 ){
+    message_list <- paste(message_list, "LOWEST CONTINUOUS PARAMETER ESS \n")
+    for (i in 1:length(my_runs)){
+      message_list <- paste(message_list, "     RUN", i, "->", row.names(output_continuous_parameters_raw$ess)[which.min(output_continuous_parameters_raw$ess[[i]])],  round(min(output_continuous_parameters_raw$ess[[i]]), digits = 2), "\n") 
+    }
+    message_list <- paste(message_list, " \n")
+  }
+  
+  # reporting commands that the user can use to visualize the output
+  if( length(my_runs[[1]]$ptable) > 0 ){
+    message_list <- paste(message_list, "To check the calculated parameters for the continuous parameters type: \n")
+    message_list <- paste(message_list, "     Means: output$continuous_parameters$means \n")
+    message_list <- paste(message_list, "     ESS: output$continuous_parameters$ess \n")
+    if( length(my_runs) > 0 ) message_list <- paste(message_list, "     KS score: output$continuous_parameters$compare_runs \n")
+    message_list <- paste(message_list, " \n")
+  }
+  if( length(my_runs[[1]]$trees) > 0 ){
+    message_list <- paste(message_list, "To check the calculated parameters for the splits type: \n")
+    message_list <- paste(message_list, "     Frequencies of splits: output$tree_parameters$frequencies \n")
+    message_list <- paste(message_list, "     ESS: output$tree_parameters$ess \n")
+    if( length(my_runs) > 0 ) message_list <- paste(message_list, "     Difference in frequencies: output$tree_parameters$compare_runs \n")
+    message_list <- paste(message_list, " \n")
+  }
+  
+  class(message_list) <- "list.fails"
+  
   if( length(fails) > 0 ){
     tmp <- list()
     for (i in 1:(length(fails))) {
-      #tmp <- paste(tmp,fails[i], "\n", fails[i+1], "\n")
       tmp <- paste(tmp,fails[i], "\n")
     }
     fails <- tmp
   }
   
   if(count_decision == 0){
-    final_output$message <- "Achieved convergence"
+    final_output$message <- message_list
     final_output$converged <- TRUE
   }else{
-    final_output$message <- "Failed convergence"
+    final_output$message <- message_list
     final_output$converged <- FALSE
     final_output$failed <- fails
     final_output$failed_names <- fails_names
-
+    
     class(final_output$failed) <- "list.fails"
-   
+    
   }
   
-  class(output_continuous_parameters_raw) <- "convenience.diag"
-  class(output_tree_parameters_raw) <- "convenience.diag"
+  ## Changing formats for better looking output ##
+  tmp_freq <- list()
+  if( length(my_runs[[1]]$trees) > 0 ){
+    if( length(my_runs) > 1){
+      if( length(output_tree_parameters_raw$compare_runs) > 0 ){
+        for (i in 1:ncol(output_tree_parameters_raw$compare_runs)) {
+          tmp_freq <- c(tmp_freq, output_tree_parameters_raw$compare_runs[1,i])
+        }
+        names(tmp_freq) <- colnames(output_tree_parameters_raw$compare_runs)
+        output_tree_parameters_raw$compare_runs <- tmp_freq
+        
+      }
+    }
+  }
   
-  final_output$continuous_parameters <- output_continuous_parameters_raw
-  final_output$tree_parameters <- output_tree_parameters_raw
+  if(length(my_runs[[1]]$trees) > 0) output_tree_parameters_raw$compare_runs <- as.data.frame(output_tree_parameters_raw$compare_runs)
   
+  if( ncol(output_tree_parameters_raw$frequencies)  > 1 & length(my_runs) > 1 ){
+    output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies[2,]))/ncol(output_tree_parameters_raw$frequencies)
+  } else if( length(my_runs) > 1 ){
+    output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies[2,])
+  }
+  ####
   
+  final_output$continuous_parameters <- output_continuous_parameters_raw[-1]
+  final_output$tree_parameters <- output_tree_parameters_raw[-(1:2)]
+  
+  class(final_output$continuous_parameters) <- "convenience.table"
+  class(final_output$tree_parameters) <- "convenience.table"
   class(final_output) <- "convenience.diag"
-  
+    
   final_output
 }

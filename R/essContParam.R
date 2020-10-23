@@ -1,17 +1,18 @@
-#' ESS for the continuous parameters
+#' ESS calculation for the continuous parameters
 #' 
 #' Calculates the Effective Sample Size for the continuous parameters
 #' 
 #' @param runs A list of rwty.chain type
 #' @param windows A boolean to set if the calculation is within runs or between runs
 #' @param namesToExclude Column names to exclude from the calculations
+#' @param tracer A boolean to determine if ESS should be calculated with Tracer method. If set to FALSE, ESS will be calculated with CODA
 #' 
-#' @return A data-frame with ESS values
+#' @return A data-frame with ESS values for the continuous parameters
 #' 
 #' @export
 
 
-essContParam <- function(runs, windows=FALSE, namesToExclude) {
+essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
 
   if(!windows){
     vecEss <- vector("list", length = 0)
@@ -27,7 +28,11 @@ essContParam <- function(runs, windows=FALSE, namesToExclude) {
         }
       }
       
-      vecEss <- c(vecEss, effectiveSize(cont_param))
+      if( tracer == T){
+        vecEss <- c(vecEss, sapply(cont_param, essTracer))
+      } else{
+        vecEss <- c(vecEss, effectiveSize(cont_param))
+      } 
     }
     
     n_param <- length(vecEss)/length(runs)
@@ -47,8 +52,14 @@ essContParam <- function(runs, windows=FALSE, namesToExclude) {
     
     for (i in 1:length(runs)) {
       cont_param <- getInfo(runs, i, splitWindows = TRUE, namesToExclude)
-      vecESS <- c(vecESS, effectiveSize(cont_param[[1]]))
-      vecESS <- c(vecESS, effectiveSize(cont_param[[2]]))
+      
+      if( tracer == T ){
+        vecESS <- c(vecESS, essTracer(cont_param[[1]]))
+        vecESS <- c(vecESS, essTracer(cont_param[[2]]))
+      }else{
+        vecESS <- c(vecESS, effectiveSize(cont_param[[1]]))
+        vecESS <- c(vecESS, effectiveSize(cont_param[[2]]))
+      }
     }
     
     n_param <- length(vecESS)/(length(runs)*2)

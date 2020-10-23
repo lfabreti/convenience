@@ -2,16 +2,13 @@
 % Please edit documentation in R/printConvergenceDiag.R
 \name{print.convenience.diag}
 \alias{print.convenience.diag}
-\title{ESS for split frequencies}
+\title{Print method for convenience.diag}
 \usage{
 \method{print}{convenience.diag}(x)
 }
-\value{
-
+\arguments{
+\item{x}{A list of convenience.diag type}
 }
 \description{
-explain
-}
-\examples{
-
+Print method for convenience.diag
 }

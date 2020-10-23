@@ -2,12 +2,14 @@
 % Please edit documentation in R/essSplitFreq.R
 \name{essSplitFreq}
 \alias{essSplitFreq}
-\title{ESS for splits}
+\title{ESS calculation for the splits}
 \usage{
-essSplitFreq(runs)
+essSplitFreq(runs, tracer)
 }
 \arguments{
-\item{runs}{The runs from loadFiles()}
+\item{runs}{A list of rwty.chain type}
+
+\item{tracer}{A boolean to determine if ESS should be calculated with Tracer method. If set to FALSE, ESS will be calculated with CODA}
 }
 \value{
 A list with the ESS for each split

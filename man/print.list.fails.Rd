@@ -2,16 +2,13 @@
 % Please edit documentation in R/printListFails.R
 \name{print.list.fails}
 \alias{print.list.fails}
-\title{Print the list of fails}
+\title{Print method for list.fails}
 \usage{
 \method{print}{list.fails}(x)
 }
-\value{
-
+\arguments{
+\item{x}{A list of convenience.diag type}
 }
 \description{
-Print the list of fails
-}
-\examples{
-
+Print method for list.fails
 }

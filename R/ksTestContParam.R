@@ -1,13 +1,12 @@
-#' Kolmogorov-Smirnov test for the Continuous Parameters
+#' Kolmogorov-Smirnov test for the continuous parameters
 #' 
+#' Calculates the KS test for the comparison between runs or windows of the same run
 #' 
 #' @param runs A list of rwty.chain type
+#' @param windows A boolean to set if the calculation is within runs or between runs
 #' @param namesToExclude Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior
 #' 
 #' @return 
-#' 
-#' @example 
-#' # statsContParam(runs, windows = FALSE, namesToExclude = "bl|Iteration|Likelihood|Posterior|Prior")
 #' 
 #' @export
 

@@ -16,16 +16,15 @@ loadMulti(
 \arguments{
 \item{path}{The path to the directory containing tree and log files}
 
-\item{format}{File format, which is used to find tree and log files.
-Currently accepted values "revbayes" for RevBayes.
-If you would like RWTY to understand additional formats, please contact the authors and send us some sample data.}
+\item{format}{File format, which is used to find tree and log files
+Currently accepted values "revbayes" for RevBayes, "mb" for MrBayes, "beast" for Beast and "*beast" for StarBeast}
 
-\item{labels}{A vector of names to assign to chains as they are read in.}
+\item{labels}{A vector of names to assign to chains as they are read in}
 
-\item{...}{Further arguments to be passed to load.trees.}
+\item{...}{Further arguments to be passed to load.trees}
 }
 \value{
-output A list of rwty.chain objects containing the multiPhylos and the tables of values from the log files if available.
+output A list of rwty.chain objects containing the multiPhylos and the tables of values from the log files if available
 }
 \description{
 Load all matching files from a directory or a list of files into a list of rwty.chain objects
@@ -33,7 +32,3 @@ Load all matching files from a directory or a list of files into a list of rwty.
 \details{
 Finds trees and log files based on format definition, returns rwty.chain objects containing both
 }
-\keyword{MCMC,}
-\keyword{Phylogenetics,}
-\keyword{load,}
-\keyword{trees}

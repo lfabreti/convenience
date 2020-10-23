@@ -1,14 +1,15 @@
-#' ESS for splits
+#' ESS calculation for the splits
 #' 
 #' Calculates the Effective Sample Size for the splits in the trees
 #' 
-#' @param runs The runs from loadFiles()
+#' @param runs A list of rwty.chain type
+#' @param tracer A boolean to determine if ESS should be calculated with Tracer method. If set to FALSE, ESS will be calculated with CODA
 #' 
 #' @return A list with the ESS for each split
 #' 
 #' @export
 
-essSplitFreq <- function(runs){
+essSplitFreq <- function(runs, tracer){
   
   listESS <- list()
   names_runs <- vector()
@@ -24,27 +25,34 @@ essSplitFreq <- function(runs){
     clades <-  clade.freq.trees(x, start = 1, end = length(x))
     total_n_splits <- length(clades$cladenames_post)
     
-    ess_splits_coda <- vector()
+    ess_splits <- vector()
     
-    for (j in 1:total_n_splits) {
-      is.split <- vector()
-      vecNames <- vector()
-      
-      for (i in 1:length(clades.list)) {
-        if (clades$cladenames[j] %in% clades.list[[i]]$cladenames){
-          is.split <- c(is.split, 1)
+    if( length(clades[[1]]) > 0 ){
+      for (j in 1:total_n_splits) {
+        is.split <- vector()
+        vecNames <- vector()
+        
+        for (i in 1:length(clades.list)) {
+          if (clades$cladenames[j] %in% clades.list[[i]]$cladenames){
+            is.split <- c(is.split, 1)
+          }
+          else{
+            is.split <- c(is.split, 0)
+          }
         }
-        else{
-          is.split <- c(is.split, 0)
+        
+        vecNames <- c( vecNames, as.character(clades$cladenames_post))
+        
+        if( tracer == T){
+          ess_splits <- c(ess_splits, essTracer(is.split))
+        }else{
+          ess_splits <- c(ess_splits, effectiveSize(is.split))
         }
       }
-      
-      vecNames <- c( vecNames, as.character(clades$cladenames_post))
-      
-      ess_splits_coda <- c(ess_splits_coda, essTracer(is.split))
     }
-    listESS[[z]] <- ess_splits_coda
-    names(listESS[[z]]) <- vecNames
+    
+    listESS[[z]] <- ess_splits
+    if( length(ess_splits) > 0 ) names(listESS[[z]]) <- vecNames
   }
   
   names(listESS) <- names_runs

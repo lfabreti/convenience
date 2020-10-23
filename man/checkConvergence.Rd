@@ -2,20 +2,31 @@
 % Please edit documentation in R/checkConvergence.R
 \name{checkConvergence}
 \alias{checkConvergence}
-\title{Check Convergence}
+\title{Check Convergence full assessment}
 \usage{
-checkConvergence(path = NULL, list_files = NULL, control = makeControl())
+checkConvergence(
+  path = NULL,
+  list_files = NULL,
+  format = "revbayes",
+  control = makeControl()
+)
 }
 \arguments{
 \item{path}{Path to directory containing all files from the same analysis}
 
 \item{list_files}{List of files to check for convergence}
 
-\item{control}{List of arguments to the function. Includes burn-in, precision and names of parameters to exclude from the analysis}
+\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"}
+
+\item{control}{List of arguments to the function. Includes tracer (to calculate the ESS with Tracer method), burn-in, precision and names of parameters to exclude from the analysis}
 }
 \value{
 List of type convenience.diag
 }
 \description{
-Check output from RevBayes for convergence diagnostics
+Check output from phylogenetic MCMC analysis for convergence diagnostics
+}
+\examples{
+checkConvergence( path = "example/4_runs" )
+
 }

@@ -4,32 +4,20 @@
 \alias{loadFiles}
 \title{Load Files}
 \usage{
-loadFiles(
-  path = NULL,
-  list_files = NULL,
-  format = "revbayes",
-  burnin,
-  tree_name = "psi",
-  log_ext = "*.log",
-  tree_ext = "*.trees"
-)
+loadFiles(path = NULL, list_files = NULL, format, tree_name = "psi")
 }
 \arguments{
 \item{path}{The path to the folder with all the output}
 
-\item{format}{The format of the output, default = "revbayes"}
+\item{list_files}{List of files with the output}
 
-\item{burnin}{Fraction of generations to discard, default = 0.1}
+\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"}
 
 \item{tree_name}{The name of the column containing the trees, default = "psi"}
-
-\item{log_ext}{The extension of your log files, default = "*.log"}
-
-\item{tree_ext}{The extension of your tree files, default = "*.trees"}
 }
 \value{
 List of type rwty.chain
 }
 \description{
-Load files from your output, they can be log files, tree files or both
+Load files from the output of a MCMC. The input can be log files, tree files or both
 }

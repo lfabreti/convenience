@@ -36,7 +36,7 @@
 #' @export
 
 readTrace <- function(paths, format = "simple",
-                      delim="\t", burnin = 0.1, check.names = FALSE, ...){
+                      delim="\t", burnin = 0.1, check.names = FALSE, skip, ...){
   
   # enforce argument matching
   
@@ -69,7 +69,7 @@ readTrace <- function(paths, format = "simple",
   
   header <- vector("list", num_paths)
   for (i in 1:num_paths) {
-    header[[i]] <- colnames(utils::read.table(file = paths[i], header = TRUE, sep = delim, check.names = check.names, nrows=0))
+    header[[i]] <- colnames(utils::read.table(file = paths[i], header = TRUE, skip = skip, sep = delim, check.names = check.names, nrows=0))
   }
   
   all_headers <- unique(unlist(header))
@@ -89,7 +89,7 @@ readTrace <- function(paths, format = "simple",
       cat(paste0("Reading in log file ",i),"\n",sep="")
       
       out <- utils::read.table(file = paths[i], header = TRUE,
-                               sep = delim, check.names = check.names, ...)
+                               sep = delim, check.names = check.names, skip = skip, ...)
       
       if (burnin >= nrow(out)) stop("Burnin larger than provided trace file")
       

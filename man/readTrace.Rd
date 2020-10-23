@@ -10,6 +10,7 @@ readTrace(
   delim = "\\t",
   burnin = 0.1,
   check.names = FALSE,
+  skip,
   ...
 )
 }

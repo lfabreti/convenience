@@ -1,18 +1,7 @@
-#' ESS for split frequencies
-#' 
-#' explain
-#' 
-#' @param 
-#' 
-#' @return 
-#' 
-#' @example 
+#' Utilities
 #' 
 #' @export makeControl
-
-abc <- function(x, percent){
-  return(sd(x)*4*percent)
-}
+#' @export ksThreshold
 
 # Calculates the relative difference of some stats for 2 dataframes
 calcRelativeDiff <- function(dataframe1, dataframe2, stats){
@@ -29,6 +18,58 @@ check <- function(df1, df2){
   }
   
   return(df)
+}
+
+check.clades.freq <- function(runs, freq){
+  
+  cladenames_post <- vector("list", length = length(runs))
+  for (z in 1:length(runs)) {
+    
+    x <- getInfo(runs, z, trees = TRUE)
+    start <- 1
+    end <- length(x)
+    
+    if(class(x) == "rwty.chain"){
+      x <- x$trees
+    }
+    
+    if (length(x) == 1 && class(x[[1]]) == "multiPhylo"){
+      x <- x[[1]]
+    }
+    
+    x <- x[start:end]
+    
+    clades <-  prop.part(x)
+    
+    cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
+    
+    cladefreqs <- cladefreqs/length(x)
+    
+    tiplabels <- as.character(x[[1]]$tip.label)
+    
+    cladenames <- rep(NA, length(clades))
+    
+    for(i in 1:length(clades)){
+      taxa_indices <- clades[[i]]
+      taxa <- tiplabels[taxa_indices]
+      sorted_taxa <- sort(taxa)
+      cladenames[i] <- paste(sorted_taxa, collapse=" ")
+    }
+    aux <- vector()
+    for (i in 1:length(cladenames)) {
+      if(freq > 0.5) {
+        if( cladefreqs[i] > freq ) aux <- c(aux, cladenames[i])
+      } else{
+        if( cladefreqs[i] < freq ) aux <- c(aux, cladenames[i])
+      }
+      #if( cladefreqs[i] > 0.975 | cladefreqs[i] < 0.025 ){
+       # aux <- c(aux, cladenames[i])
+      #}
+    }
+    cladenames_post[[z]] <- aux
+  }
+  
+  return(cladenames_post)
 }
 
 # Adjust the names of tips for split frequencies
@@ -64,7 +105,7 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   cladenames_post <- vector()
   cladefreqs_post <- vector()
   for (i in 1:length(cladenames)) {
-    if( cladefreqs[i] <= 0.9 & cladefreqs[i] >= 0.1 ){
+    if( cladefreqs[i] <= 0.975 & cladefreqs[i] >= 0.025 ){
       cladenames_post <- c(cladenames_post, cladenames[i])
       cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
     }
@@ -133,7 +174,7 @@ clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
   cladenames_post <- vector()
   cladefreqs_post <- vector()
   for (i in 1:length(cladenames)) {
-    if(  clade_frequencies[i] <= 0.9 &  clade_frequencies[i] >= 0.1 ){
+    if(  clade_frequencies[i] <= 0.975 &  clade_frequencies[i] >= 0.025 ){
       cladenames_post <- c(cladenames_post, cladenames[i])
       cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
     }
@@ -272,8 +313,6 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
     cont_param <- all_runs[[run]]["ptable"]
     cont_param <- as.data.frame(all_runs[[run]]["ptable"])
     names(cont_param) <- gsub("ptable.","",names(cont_param),fixed=TRUE)
-    #column <- grepl(pattern = namesToExclude, names(cont_param))
-    #cont_param <- cont_param[,!column]
     column <- grep(pattern = namesToExclude, names(cont_param), value = T)
     cont_param <- cont_param[-match(column, names(cont_param))]
     if( !splitWindows ){
@@ -339,12 +378,13 @@ ksThreshold <- function(alpha, ess1, ess2){
 }
 
 # Function to create control argument for checkConvergence
-makeControl <- function( burnin = NULL, precision = NULL, namesToExclude = NULL ){
-  control <- vector(mode = "list", length = 3)
+makeControl <- function( tracer = NULL, burnin = NULL, precision = NULL, namesToExclude = NULL ){
+  control <- vector(mode = "list", length = 4)
+  control$tracer <- tracer
   control$burnin <- burnin
   control$precision <- precision
   control$namesToExclude <- namesToExclude
-  names(control) <- c("burnin", "precision", "namesToExclude")
+  names(control) <- c("tracer", "burnin", "precision", "namesToExclude")
   return(control)
 }
 

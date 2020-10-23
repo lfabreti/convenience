@@ -7,5 +7,13 @@ Maintaners: Luiza Fabreti
 License: What license it uses
 Encoding: UTF-8
 LazyData: true
-Depends: ape, coda, mcmcse, rwty, utils
+Depends: 
+    ape,
+    coda,
+    mcmcse,
+    rwty,
+    utils,
+	viridis,
+	scales,
+    R (>= 2.10)
 RoxygenNote: 7.1.1

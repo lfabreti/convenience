@@ -1,18 +1,9 @@
-#' ESS for split frequencies
+#' Print method for convenience.diag
 #' 
-#' explain
-#' 
-#' @param 
-#' 
-#' @return 
-#' 
-#' @example 
+#' @param x A list of convenience.diag type
 #' 
 #' @export
 
 print.convenience.diag <- function(x){
-  if ( length(x)>3 ){
-    print(x$message)
-  }
-  print(summary(x))
+  print(x$message)
 }
