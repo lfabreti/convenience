@@ -34,7 +34,8 @@ plotKS.pooled <- function(x, bins,precision = 0.01){
                breaks = break_values,
                col = scales::alpha(colors_hist[1],.5),
                border = T,
-               yaxs="i")
+               yaxs="i",
+               las = 1)
   plot <- box("plot", "solid")
   
   for (i in 2:length(ks_values)) {
@@ -43,16 +44,18 @@ plotKS.pooled <- function(x, bins,precision = 0.01){
          col = scales::alpha(colors_hist[i],.5),
          breaks = break_values,
          border = T,
-         yaxs="i")
+         yaxs="i",
+         las = 1)
   }
-  plot <- abline( v = minimumKS, col = "red", lwd=2)
+  plot <- abline( v = minimumKS, col = "red", lwd=2, lty = 2)
+  plot <- axis(1, at = round(minimumKS, digits = 2))
   
   legend("topright",
          legend = rownames(x$continuous_parameters$compare_runs),
          fill = scales::alpha(colors_hist,.5),
          box.lty = 0,
-         inset=c(-0.5,0),
-         cex = 0.7,
+         inset=c(-0.35,0),
+         cex = 0.9,
          xpd=T
          )
   

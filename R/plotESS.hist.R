@@ -26,9 +26,11 @@ plotESS.hist <- function(x, trees,precision = 0.01){
                  xlim = c(min(minimumESS, ESS_values), (max(minimumESS, ESS_values)+1000) ),
                  col = "grey",
                  breaks = ((max(ESS_values) - min(ESS_values))/minimumESS),
-                 yaxs = "i")
+                 yaxs = "i",
+                 las = 1)
     plot <- box("plot", "solid")
-    plot <- abline(v = minimumESS, col = "red", lwd= 2)
+    plot <- abline(v = minimumESS, col = "red", lwd= 2, lty=2)
+    plot <- axis(1, at = minimumESS)
     
   } else{
     for (i in 1:ncol(x$continuous_parameters$ess)) {
@@ -40,9 +42,11 @@ plotESS.hist <- function(x, trees,precision = 0.01){
                  main = "Histogram of ESS for continuous parameters",
                  xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
                  col = "grey",
-                 yaxs="i")
+                 yaxs="i",
+                 las = 1)
     plot <- box("plot", "solid")
-    plot <- abline(v = minimumESS, col = "red", lwd= 2)
+    plot <- abline(v = minimumESS, col = "red", lwd= 2, lty=2)
+    plot <- axis(1, at = minimumESS)
   }
   
 }

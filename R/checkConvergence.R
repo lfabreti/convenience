@@ -189,7 +189,11 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     ## ESS ##
     
     ess_runs_splits <- essSplitFreq(my_runs, tracer)
-    output_tree_parameters_raw$ess <- as.data.frame(ess_runs_splits)
+    output_tree_parameters_raw$ess <- ess_runs_splits
+    #df_aux <- plyr::ldply(ess_runs_splits, rbind)
+    #output_tree_parameters_raw$ess <- setNames(data.frame(t(df_aux[,-1]), row.names = colnames(df_aux)[-1]), df_aux[,1])
+    
+    #as.data.frame(ess_runs_splits)
     
     for (i in 1:length(ess_runs_splits)) {
       ess_runs_splits[[i]] <- ess_runs_splits[[i]] - minimumESS
@@ -343,7 +347,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     }
     
     ## Runs ##
-    if (length(my_runs)>1 & length(output_tree_parameters_raw) > 3 ){
+    if ( length(my_runs) > 1 & length(output_tree_parameters_raw) > 3 & length(output_tree_parameters[[2]]) > 0 ){
       for (i in 1:length(output_tree_parameters[[2]])) {
         split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
       }
@@ -427,6 +431,14 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   }
   
   
+  if( length(fails) > 0 ){
+    tmp <- list()
+    for (i in 1:(length(fails))) {
+      tmp <- paste(tmp,fails[i], " \n ", sep = "")
+    }
+    fails <- tmp
+  }
+  
   ##### SUMMARIZING RESULTS #####
   
   message_list <- list()
@@ -435,6 +447,8 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     message_list <- paste(message_list, " \n")
   }else{
     message_list <- paste(message_list, "FAILED CONVERGENCE", "\n")
+    message_list <- paste(message_list, " \n")
+    message_list <- paste(message_list, fails)
     message_list <- paste(message_list, " \n")
   } 
   
@@ -480,7 +494,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   if( length(my_runs[[1]]$trees) > 0 ){
     message_list <- paste(message_list, "LOWEST SPLIT ESS \n")
     for (i in 1:length(my_runs)) {
-      message_list <- paste(message_list, "     RUN", i, "->", names(which.min(output_tree_parameters_raw$ess[[i]])), round(min(output_tree_parameters_raw$ess[[i]]), digits = 2), "\n")
+      message_list <- paste(message_list, "     RUN", i, "->", names(which.min(output_tree_parameters_raw$ess[[i]])), round(min(output_tree_parameters_raw$ess[[i]], na.rm = T), digits = 2), "\n")
     }
     message_list <- paste(message_list, " \n")
   }
@@ -512,14 +526,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   class(message_list) <- "list.fails"
   
-  if( length(fails) > 0 ){
-    tmp <- list()
-    for (i in 1:(length(fails))) {
-      tmp <- paste(tmp,fails[i], "\n")
-    }
-    fails <- tmp
-  }
-  
   if(count_decision == 0){
     final_output$message <- message_list
     final_output$converged <- TRUE
@@ -534,6 +540,8 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   }
   
   ## Changing formats for better looking output ##
+  
+  # format of splits comparison between runs
   tmp_freq <- list()
   if( length(my_runs[[1]]$trees) > 0 ){
     if( length(my_runs) > 1){
@@ -550,11 +558,20 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   if(length(my_runs[[1]]$trees) > 0) output_tree_parameters_raw$compare_runs <- as.data.frame(output_tree_parameters_raw$compare_runs)
   
-  if( ncol(output_tree_parameters_raw$frequencies)  > 1 & length(my_runs) > 1 ){
-    output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies[2,]))/ncol(output_tree_parameters_raw$frequencies)
-  } else if( length(my_runs) > 1 ){
-    output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies[2,])
+  # format of ESS for splits
+  if(length(my_runs[[1]]$trees) > 0){
+    
+    df_aux <- plyr::ldply(ess_runs_splits, rbind)
+    output_tree_parameters_raw$ess <- setNames(data.frame(t(df_aux[,-1]), row.names = colnames(df_aux)[-1]), df_aux[,1])
+    
+    #format of frequencies
+    if( ncol(output_tree_parameters_raw$frequencies)  > 1 & length(my_runs) > 1 ){
+      output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies[2,]))/ncol(output_tree_parameters_raw$frequencies)
+    } else if( length(my_runs) > 1 ){
+      output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies[2,])
+    }
   }
+  
   ####
   
   final_output$continuous_parameters <- output_continuous_parameters_raw[-1]

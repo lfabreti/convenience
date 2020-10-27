@@ -25,9 +25,11 @@ plotKS.hist <- function(x, precision = 0.01){
                main = "KS histogram",
                xlim = c( min(minimumKS, KS_values), max(minimumKS, KS_values) ),
                col = "grey",
-               yaxs="i")
+               yaxs ="i",
+               las = 1)
   plot <- box("plot", "solid")
-  plot <- abline( v = minimumKS, col = "red", lwd= 2)
+  plot <- abline( v = minimumKS, col = "red", lwd= 2, lty = 2)
+  plot <- axis(1, at = round(minimumKS, digits = 2))
                
   }
 
