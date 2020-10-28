@@ -5,12 +5,13 @@
 #' @param x A list of convenience.diag type
 #' @param bins The number of bins to determine the intervals of the histogram
 #' @param precision The precision of the mean estimates. Default is 0.01
+#' @param ... (various) Additional arguments passed to plot().
 #' 
 #' @return Histogram
 #' 
 #' @export
 
-plotKS.pooled <- function(x, bins,precision = 0.01){
+plotKSPooled <- function(x, bins, precision = 0.01, ...){
   
   minimumESS <- minESS(precision)
   minimumKS <- ksThreshold(1.95,minimumESS, minimumESS)
@@ -35,7 +36,8 @@ plotKS.pooled <- function(x, bins,precision = 0.01){
                col = scales::alpha(colors_hist[1],.5),
                border = T,
                yaxs="i",
-               las = 1)
+               las = 1,
+               ...)
   plot <- box("plot", "solid")
   
   for (i in 2:length(ks_values)) {
@@ -45,7 +47,8 @@ plotKS.pooled <- function(x, bins,precision = 0.01){
          breaks = break_values,
          border = T,
          yaxs="i",
-         las = 1)
+         las = 1,
+         ...)
   }
   plot <- abline( v = minimumKS, col = "red", lwd=2, lty = 2)
   plot <- axis(1, at = round(minimumKS, digits = 2))

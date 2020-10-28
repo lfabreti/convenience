@@ -16,6 +16,7 @@ printTableSplits <- function(output, filename = NULL){
   }
   colnames(df_splits) <- "frequencies"
   df_splits$ESS <- rowSums(output$tree_parameters$ess)
+  df_splits <- df_splits[order(df_splits$frequencies),]
   
   if( is.null(filename) ){
     return(df_splits)
