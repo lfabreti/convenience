@@ -15,7 +15,7 @@
 plotKS <- function(x, precision = 0.01, color = "grey", ...){
   
   minimumESS <- minESS(precision)
-  minimumKS <- ksThreshold(1.95,minimumESS, minimumESS)
+  minimumKS <- ksThreshold(0.01,minimumESS)
   
   KS_values <- vector()
   

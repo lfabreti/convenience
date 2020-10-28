@@ -14,7 +14,7 @@
 plotKSPooled <- function(x, bins, precision = 0.01, ...){
   
   minimumESS <- minESS(precision)
-  minimumKS <- ksThreshold(1.95,minimumESS, minimumESS)
+  minimumKS <- ksThreshold(0.01,minimumESS)
   
   ks_values <- list()
   for (i in 1:nrow(x$continuous_parameters$compare_runs)) {

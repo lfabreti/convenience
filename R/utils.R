@@ -373,8 +373,9 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
 }
 
 # Calculates the threshold for the KS test
-ksThreshold <- function(alpha, ess1, ess2){
-  return( (alpha*sqrt((ess1+ess2)/(ess1*ess2))) )
+ksThreshold <- function(alpha, ess){
+  c_alpha <- sqrt( -(log(alpha/2)) * 0.5) 
+  return( (c_alpha*sqrt((2*ess)/(ess*ess))) )
 }
 
 # Function to create control argument for checkConvergence

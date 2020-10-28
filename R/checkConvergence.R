@@ -122,10 +122,10 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
       ks_limits_windows <-vector()
       for (i in 1:length(my_runs)) {
         if (typeof(ks_windows) == "double"){
-          ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
+          ks_limits_windows <- c(ks_limits_windows, ksThreshold(0.01, minimumESS_windows))
         }else{
           for (j in 1:ncol(ks_windows)) {
-            ks_limits_windows <- c(ks_limits_windows, ksThreshold(1.95, minimumESS_windows, minimumESS_windows))
+            ks_limits_windows <- c(ks_limits_windows, ksThreshold(0.01, minimumESS_windows))
           }
         }
       }
@@ -291,7 +291,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
       for (df1 in 1:(length(my_runs)-1)){
         for (df2 in (df1+1):length(my_runs)) {
           for (i in 1:ncol(ks_runs)) {
-            ks_limits <- c(ks_limits, ksThreshold(1.95,minimumESS, minimumESS))
+            ks_limits <- c(ks_limits, ksThreshold(0.01,minimumESS))
           }
           count <- count+1
         }
