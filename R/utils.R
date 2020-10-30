@@ -1,7 +1,14 @@
 #' Utilities
 #' 
+#' @import Rcpp
+#' @importFrom Rcpp evalCpp
 #' @export makeControl
 #' @export ksThreshold
+
+#' @useDynLib convenience
+#' @importFrom Rcpp sourceCpp
+NULL
+#> NULL
 
 # Calculates the relative difference of some stats for 2 dataframes
 calcRelativeDiff <- function(dataframe1, dataframe2, stats){

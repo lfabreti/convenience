@@ -44,7 +44,7 @@ essSplitFreq <- function(runs, tracer){
         vecNames <- c( vecNames, as.character(clades$cladenames_post))
         
         if( tracer == T){
-          ess_splits <- c(ess_splits, essTracer(is.split))
+          ess_splits <- c(ess_splits, essTracerC(is.split))
         }else{
           ess_splits <- c(ess_splits, effectiveSize(is.split))
         }

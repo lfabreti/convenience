@@ -16,4 +16,7 @@ Depends:
 	viridis,
 	scales,
     R (>= 2.10)
+LinkingTo: Rcpp
+Imports: 
+    Rcpp
 RoxygenNote: 7.1.1

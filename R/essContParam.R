@@ -29,7 +29,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
       }
       
       if( tracer == T){
-        vecEss <- c(vecEss, sapply(cont_param, essTracer))
+        vecEss <- c(vecEss, sapply(cont_param, essTracerC))
       } else{
         vecEss <- c(vecEss, effectiveSize(cont_param))
       } 
@@ -54,8 +54,8 @@ essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
       cont_param <- getInfo(runs, i, splitWindows = TRUE, namesToExclude)
       
       if( tracer == T ){
-        vecESS <- c(vecESS, essTracer(cont_param[[1]]))
-        vecESS <- c(vecESS, essTracer(cont_param[[2]]))
+        vecESS <- c(vecESS, sapply(cont_param[[1]], essTracerC))
+        vecESS <- c(vecESS, sapply(cont_param[[2]], essTracerC))
       }else{
         vecESS <- c(vecESS, effectiveSize(cont_param[[1]]))
         vecESS <- c(vecESS, effectiveSize(cont_param[[2]]))
