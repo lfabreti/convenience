@@ -16,7 +16,7 @@ You can install the package using devtools:
 
 ## Tutorial
 
-A tutorial can be foun in [Convergence Tutorial](https://revbayes.github.io/tutorials/convergence/)
+A tutorial can be found in [Convergence Tutorial](https://revbayes.github.io/tutorials/convergence/)
 
 
 
