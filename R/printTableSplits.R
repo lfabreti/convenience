@@ -8,11 +8,14 @@
 printTableSplits <- function(output, filename = NULL){
   
   if( ncol(output$tree_parameters$ess) == 1 ){
-    names_spits <- output$tree_parameters$frequencies[1,]
-    freq_splits <- as.numeric(output$tree_parameters$frequencies[2,])
+    names_spits <- output$tree_parameters$frequencies[,1]
+    freq_splits <- output$tree_parameters$frequencies[,2]
     df_splits <- data.frame(row.names = names_spits, "frequencies" = freq_splits)
+    df_splits <- as.data.frame(df_splits[row.names(output$tree_parameters$ess),])
+    row.names(df_splits) <- row.names(output$tree_parameters$ess)
   }else{
-    df_splits <- as.data.frame(output$tree_parameters$frequencies)
+    df_splits <- as.data.frame(output$tree_parameters$frequencies[row.names(output$tree_parameters$ess),])
+    row.names(df_splits) <- row.names(output$tree_parameters$ess)
   }
   colnames(df_splits) <- "frequencies"
   df_splits$ESS <- rowSums(output$tree_parameters$ess)

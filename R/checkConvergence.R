@@ -184,16 +184,12 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     ## Split frequency ##
     
     output_tree_parameters_raw$frequencies <- splitFreq(my_runs)
-    #output_tree_parameters_raw$frequencies <- output_tree_parameters_raw$frequencies[2,]
     
     ## ESS ##
     
     ess_runs_splits <- essSplitFreq(my_runs, tracer)
     output_tree_parameters_raw$ess <- ess_runs_splits
-    #df_aux <- plyr::ldply(ess_runs_splits, rbind)
-    #output_tree_parameters_raw$ess <- setNames(data.frame(t(df_aux[,-1]), row.names = colnames(df_aux)[-1]), df_aux[,1])
-    
-    #as.data.frame(ess_runs_splits)
+    ess_run_splits_aux <- ess_runs_splits
     
     for (i in 1:length(ess_runs_splits)) {
       ess_runs_splits[[i]] <- ess_runs_splits[[i]] - minimumESS
@@ -347,19 +343,20 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     }
     
     ## Runs ##
-    if ( length(my_runs) > 1 & length(output_tree_parameters_raw) > 3 & length(output_tree_parameters[[2]]) > 0 ){
-      for (i in 1:length(output_tree_parameters[[2]])) {
-        split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
-      }
-      names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
-      decision_list_trees[[3]] <- split_freq_runs
-      for (i in 1:length(decision_list_trees[[2]])) {
-        if ( length(decision_list_trees[[2]][[i]]) > 0 ){
-          fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[2]][i])))
+    if (length(my_runs) > 1){
+      if ( length(output_tree_parameters_raw) > 3 & length(output_tree_parameters[[2]]) > 0 ){
+        for (i in 1:length(output_tree_parameters[[2]])) {
+          split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
+        }
+        names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
+        decision_list_trees[[3]] <- split_freq_runs
+        for (i in 1:length(decision_list_trees[[2]])) {
+          if ( length(decision_list_trees[[2]][[i]]) > 0 ){
+            fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[2]][i])))
+          }
         }
       }
     }
-    
     
     for (i in 1:length(decision_list_trees)) {
       if(length(decision_list_trees[[i]]) > 0 ) for (j in 1:length(decision_list_trees[[i]])) {
@@ -555,22 +552,34 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
       }
     }
   }
+  #######
   
-  if(length(my_runs[[1]]$trees) > 0) output_tree_parameters_raw$compare_runs <- as.data.frame(output_tree_parameters_raw$compare_runs)
   
   # format of ESS for splits
   if(length(my_runs[[1]]$trees) > 0){
     
-    df_aux <- plyr::ldply(ess_runs_splits, rbind)
-    output_tree_parameters_raw$ess <- setNames(data.frame(t(df_aux[,-1]), row.names = colnames(df_aux)[-1]), df_aux[,1])
+    if(length(my_runs) > 1){
+      df_1 <- plyr::ldply(output_tree_parameters_raw$compare_runs, rbind)
+      df_1 <- setNames(data.frame(t(df_1[,-1]), row.names = colnames(df_1)[-1]), df_1[,1])
+      colnames(df_1) <- names(output_tree_parameters_raw$compare_runs)
+      output_tree_parameters_raw$compare_runs <- df_1
+    }
+    
+    df_2 <- plyr::ldply(ess_run_splits_aux, rbind)
+    output_tree_parameters_raw$ess <- setNames(data.frame(t(df_2[,-1]), row.names = colnames(df_2)[-1]), df_2[,1])
     
     #format of frequencies
-    if( ncol(output_tree_parameters_raw$frequencies)  > 1 & length(my_runs) > 1 ){
-      output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies[2,]))/ncol(output_tree_parameters_raw$frequencies)
-    } else if( length(my_runs) > 1 ){
-      output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies[2,])
+    if( ncol(output_tree_parameters_raw$frequencies)  == 1 & length(my_runs) > 1 ){
+      df_3 <- plyr::ldply(output_tree_parameters_raw$frequencies, rbind)
+      output_tree_parameters_raw$frequencies <- setNames(data.frame(t(df_3[,-1]), row.names = colnames(df_3)[-1]), df_3[,1])
+      
+      output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies))/ncol(output_tree_parameters_raw$frequencies)
+      output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies)
+    }else{
+      output_tree_parameters_raw$frequencies <- as.data.frame(t(output_tree_parameters_raw$frequencies))
     }
   }
+  
   
   ####
   
@@ -580,6 +589,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   class(final_output$continuous_parameters) <- "convenience.table"
   class(final_output$tree_parameters) <- "convenience.table"
   class(final_output) <- "convenience.diag"
-    
+  
   final_output
 }

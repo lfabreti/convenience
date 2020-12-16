@@ -69,9 +69,6 @@ check.clades.freq <- function(runs, freq){
       } else{
         if( cladefreqs[i] < freq ) aux <- c(aux, cladenames[i])
       }
-      #if( cladefreqs[i] > 0.975 | cladefreqs[i] < 0.025 ){
-       # aux <- c(aux, cladenames[i])
-      #}
     }
     cladenames_post[[z]] <- aux
   }
@@ -112,10 +109,8 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   cladenames_post <- vector()
   cladefreqs_post <- vector()
   for (i in 1:length(cladenames)) {
-    if( cladefreqs[i] <= 0.975 & cladefreqs[i] >= 0.025 ){
-      cladenames_post <- c(cladenames_post, cladenames[i])
-      cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
-    }
+    cladenames_post <- c(cladenames_post, cladenames[i])
+    cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
   }
   
   clade.df <- data.frame(cladenames_post, cladefreqs_post)
@@ -126,10 +121,6 @@ clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
 clade.freq.tree <- function (x, rooted=FALSE, ...) {
   
   clades <-  prop.part(x)
-  
-  #if(!rooted){
-  #  clades <- postprocess.prop.part(clades)
-  #}
   
   cladefreqs <- as.numeric(as.character(attr(clades, which="number")[1:length(clades)] ))
   
@@ -181,7 +172,7 @@ clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
   cladenames_post <- vector()
   cladefreqs_post <- vector()
   for (i in 1:length(cladenames)) {
-    if(  clade_frequencies[i] <= 0.975 &  clade_frequencies[i] >= 0.025 ){
+    if(  clade_frequencies[i] <= 0.975 & clade_frequencies[i] >= 0.025 ){
       cladenames_post <- c(cladenames_post, cladenames[i])
       cladefreqs_post <- c(cladefreqs_post, cladefreqs[i])
     }
@@ -409,7 +400,7 @@ quants <- function(x){
 # From RWTY
 read.revbayestrees<-function(file) {
   filelines<-readLines(file)
-    column.names<-strsplit(filelines[1], split="\t")[[1]]
+  column.names<-strsplit(filelines[1], split="\t")[[1]]
   data<-strsplit(filelines[-1], split="\t")
   samplerow<-data[[1]]
   treecheck<-unlist(lapply(samplerow, FUN=isTree))
