@@ -44,10 +44,10 @@ loadMulti <- function(path = NULL, tree_files = NULL, log_files = NULL, format =
   for(i in 1:length(tfiles)){
     print(basename(tfiles[i]))
     if(file.exists(pfiles[i])){
-      output[[i]] <- load.trees(tfiles[i], logfile = pfiles[i], format = format)
+      output[[i]] <- loadTrees(tfiles[i], logfile = pfiles[i], format = format)
     }
     else{
-      output[[i]] <- load.trees(tfiles[i], format = format)
+      output[[i]] <- loadTrees(tfiles[i], format = format)
     }
   }
   

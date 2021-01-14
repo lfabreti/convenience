@@ -302,6 +302,16 @@ get.format <- function(format){
     ))
   }
   
+  # Default behavior for pyhlobayes files
+  if(format == "phylobayes"){
+    return(list(
+      trees.suffix = ".treelist",
+      log.suffix = ".trace",
+      type = "newick",
+      skip = 0
+    ))
+  }
+  
 }
 
 # Get the continuous parameters or the trees of a list of rwty.trees, returns a dataframe
