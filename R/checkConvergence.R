@@ -37,7 +37,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   }
   
   if ( is.null(control$namesToExclude) ){
-    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood|X.cycle|X.treegen|time|loglik"
+    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood|time|loglik|iter|topo"
   } else {
     namesToExclude <- control$namesToExclude
   }
