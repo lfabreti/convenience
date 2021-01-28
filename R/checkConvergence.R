@@ -569,7 +569,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     output_tree_parameters_raw$ess <- setNames(data.frame(t(df_2[,-1]), row.names = colnames(df_2)[-1]), df_2[,1])
     
     #format of frequencies
-    if( ncol(output_tree_parameters_raw$frequencies)  == 1 & length(my_runs) > 1 ){
+    if( ncol(output_tree_parameters_raw$frequencies)  >= 1 & length(my_runs) > 1 ){
       df_3 <- plyr::ldply(output_tree_parameters_raw$frequencies, rbind)
       output_tree_parameters_raw$frequencies <- setNames(data.frame(t(df_3[,-1]), row.names = colnames(df_3)[-1]), df_3[,1])
       

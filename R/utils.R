@@ -408,6 +408,11 @@ quants <- function(x){
 }
 
 # From RWTY
+isTree<-function(x) {
+  !is.null(try(read.tree(text=x)))
+}
+  
+# From RWTY
 read.revbayestrees<-function(file) {
   filelines<-readLines(file)
   column.names<-strsplit(filelines[1], split="\t")[[1]]
