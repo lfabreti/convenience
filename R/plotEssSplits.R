@@ -11,7 +11,11 @@
 #' 
 #' @export
 
-plotEssSplits <- function(x, precision = 0.01, color = "grey", ...){
+plotEssSplits <- function(x, precision = 0.01, color = "grey", filename = NULL, ...){
+  
+  if( !(is.null(filename)) ){
+    pdf(file = filename)
+  }
   
   minimumESS <- minESS(precision)
   ESS_values <- vector()
@@ -32,5 +36,9 @@ plotEssSplits <- function(x, precision = 0.01, color = "grey", ...){
   plot <- box("plot", "solid")
   plot <- abline(v = minimumESS, col = "red", lwd= 2, lty=2)
   plot <- axis(1, at = minimumESS)
+  
+  if( !(is.null(filename)) ){
+    dev.off()
+  } 
   
 }

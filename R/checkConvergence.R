@@ -200,7 +200,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     ## Compare runs ##
     
     if( length(my_runs) > 1 ){
-      splits_runs <- splitFreq(my_runs, windows = F)
+      splits_runs <- output_tree_parameters_raw$frequencies
       
       if( minimumESS == 625) exp_diff_runs <- convenience::exp_diff_runs 
       else  exp_diff_runs <- expectedDiffSplits(minimumESS)
@@ -573,7 +573,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
       df_3 <- plyr::ldply(output_tree_parameters_raw$frequencies, rbind)
       output_tree_parameters_raw$frequencies <- setNames(data.frame(t(df_3[,-1]), row.names = colnames(df_3)[-1]), df_3[,1])
       
-      output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies))/ncol(output_tree_parameters_raw$frequencies)
+      #output_tree_parameters_raw$frequencies <- (rowSums(as.data.frame(output_tree_parameters_raw$frequencies))*2)/ncol(output_tree_parameters_raw$frequencies)
+      output_tree_parameters_raw$frequencies <- (rowSums(as.data.frame(output_tree_parameters_raw$frequencies))*2)/(length(my_runs)-1)
+      output_tree_parameters_raw$frequencies <- (output_tree_parameters_raw$frequencies)/4
       output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies)
     }else{
       output_tree_parameters_raw$frequencies <- as.data.frame(t(output_tree_parameters_raw$frequencies))

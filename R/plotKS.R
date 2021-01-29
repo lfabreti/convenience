@@ -12,7 +12,11 @@
 #' @export
 
 
-plotKS <- function(x, precision = 0.01, color = "grey", ...){
+plotKS <- function(x, precision = 0.01, color = "grey", filename = NULL, ...){
+  
+  if( !(is.null(filename)) ){
+    pdf(file = filename)
+  }
   
   minimumESS <- minESS(precision)
   minimumKS <- ksThreshold(0.01,minimumESS)
@@ -34,6 +38,10 @@ plotKS <- function(x, precision = 0.01, color = "grey", ...){
   plot <- box("plot", "solid")
   plot <- abline( v = minimumKS, col = "red", lwd= 2, lty = 2)
   plot <- axis(1, at = round(minimumKS, digits = 2))
-               
-  }
+  
+  if( !(is.null(filename)) ){
+    dev.off()
+  } 
+  
+}
 

@@ -11,7 +11,11 @@
 #' 
 #' @export
 
-plotKSPooled <- function(x, bins, precision = 0.01, ...){
+plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
+  
+  if( !(is.null(filename)) ){
+    pdf(file = filename)
+  }
   
   minimumESS <- minESS(precision)
   minimumKS <- ksThreshold(0.01,minimumESS)
@@ -61,5 +65,9 @@ plotKSPooled <- function(x, bins, precision = 0.01, ...){
          cex = 0.9,
          xpd=T
          )
+  
+  if( !(is.null(filename)) ){
+    dev.off()
+  } 
   
 }

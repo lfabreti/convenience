@@ -11,7 +11,11 @@
 #' 
 #' @export
 
-plotEssContinuous <- function(x, precision = 0.01, color = "grey", ...){
+plotEssContinuous <- function(x, precision = 0.01, color = "grey", filename = NULL, ...){
+  
+  if( !(is.null(filename)) ){
+    pdf(file = filename)
+  }
   
   minimumESS <- minESS(precision)
   ESS_values <- vector()
@@ -32,4 +36,7 @@ plotEssContinuous <- function(x, precision = 0.01, color = "grey", ...){
   plot <- abline(v = minimumESS, col = "red", lwd= 2, lty=2)
   plot <- axis(1, at = minimumESS)
   
+  if( !(is.null(filename)) ){
+    dev.off()
+  } 
 }

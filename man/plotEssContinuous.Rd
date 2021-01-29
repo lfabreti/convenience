@@ -4,7 +4,7 @@
 \alias{plotEssContinuous}
 \title{Histogram of the ESS values}
 \usage{
-plotEssContinuous(x, precision = 0.01, color = "grey", ...)
+plotEssContinuous(x, precision = 0.01, color = "grey", filename = NULL, ...)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}
