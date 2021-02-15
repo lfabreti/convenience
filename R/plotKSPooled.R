@@ -30,38 +30,38 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
   
   colors_hist <- viridis(length(ks_values))
   
-  par(mar = c(5.1, 4.1, 4.1, 8.1), xpd=F)
+  par(mar = c(3.9, 1.87, 3.1, 5.0), xpd=F)
   plot <- hist(ks_values[[1]],
                xlab = "KS score", 
+               ylab = NA,
                main = "KS histogram",
-               xlim = c( min(minimumKS, unlist(ks_values)), max(minimumKS, unlist(ks_values)) ),
-               ylim = c( 0, length(ks_values[[1]]) ),
+               xlim = c( (min(minimumKS, unlist(ks_values)) - 0.01), (max(minimumKS, unlist(ks_values)) + 0.01) ),
+               ylim = c( 0, (length(ks_values[[1]])- 2) ),
                breaks = break_values,
-               col = scales::alpha(colors_hist[1],.5),
+               col = scales::alpha(colors_hist[1],.7),
                border = T,
                yaxs="i",
                las = 1,
                ...)
-  plot <- box("plot", "solid")
   
   for (i in 2:length(ks_values)) {
     hist(ks_values[[i]], 
          add=T, 
-         col = scales::alpha(colors_hist[i],.5),
+         col = scales::alpha(colors_hist[i],.7),
          breaks = break_values,
          border = T,
          yaxs="i",
          las = 1,
          ...)
   }
-  plot <- abline( v = minimumKS, col = "red", lwd=2, lty = 2)
-  plot <- axis(1, at = round(minimumKS, digits = 2))
+  plot <- abline( v = minimumKS, col ="antiquewhite4", lwd=2, lty = 2)
+  plot <- axis(1, at = round(minimumKS, digits = 3))
   
   legend("topright",
          legend = rownames(x$continuous_parameters$compare_runs),
-         fill = scales::alpha(colors_hist,.5),
+         fill = scales::alpha(colors_hist,.7),
          box.lty = 0,
-         inset=c(-0.35,0),
+         inset=c(-0.18,0),
          cex = 0.9,
          xpd=T
          )

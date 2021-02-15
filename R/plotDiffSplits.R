@@ -7,7 +7,11 @@
 #'  
 #' @export
 
-plotDiffSplits <- function(output, minimumESS = 625,  filename = NULL, ...){
+plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, ...){
+  
+  if( is.null(fill_color) ){
+    fill_color <- "coral3"
+  }
   
   if( !(is.null(filename)) ){
     pdf(file = filename)
@@ -39,22 +43,23 @@ plotDiffSplits <- function(output, minimumESS = 625,  filename = NULL, ...){
   y_lim <- max(differences, y_axis, na.rm = T)
   y_lim <- y_lim + 0.5*y_lim
   
-  color = "red"
+  par(mar = c(3.9, 4.9, 2.1, 0.1))
   plot <- plot(NA, 
                xlab = "Split frequency",
-               ylab = "Difference between splits",
+               ylab = NA,
                main = "Observed Difference in Split Frequencies", 
                xlim = c(0.0,1.0), 
                ylim = c(0.0, y_lim),
                las = 1)
   
-  plot <- lines(x_axis, y_axis, col = color, lwd=2)
+  plot <- lines(x_axis, y_axis, col = "antiquewhite4", lwd=3)
+  title(ylab = "Difference between splits", outer = T, line = -0.9)
   
   if( length(output$tree_parameters$compare_runs) > 2){
     for (i in 1:length(output$tree_parameters$compare_runs)) {
-      plot <- points(frequencies, differences[[i]], pch=8)
+      plot <- points(frequencies, differences[[i]], pch=16, col = fill_color)
     }
-  } else plot <- points(frequencies, differences, pch=8)
+  } else plot <- points(frequencies, differences, pch=16, col = fill_color)
   
   if( !(is.null(filename)) ){
     dev.off()
