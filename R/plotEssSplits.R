@@ -27,6 +27,7 @@ plotEssSplits <- function(x, precision = 0.01, fill_color = NULL, filename = NUL
   for (i in 1:length(x$tree_parameters$ess)) {
     ESS_values <- x$tree_parameters$ess[[i]]
   }
+  ESS_values <- ESS_values[!is.na(ESS_values)]
   y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
   
   par(mar = c(3.9, 2.2, 2.1, 0.1))

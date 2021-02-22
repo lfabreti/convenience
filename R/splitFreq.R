@@ -22,7 +22,7 @@ splitFreq <- function(runs, windows=FALSE){
       all_df[[i]] <- cladefreqs
     }
     
-    listSplits <- list()
+    listDiffSplits <- list()
     listFrequencies <- list()
     count <- 0
     
@@ -36,7 +36,7 @@ splitFreq <- function(runs, windows=FALSE){
     if( check_null ){
       if( length(runs) == 1 ){
         
-        listSplits <- as.character(all_df[[1]]$cladenames_post)
+        listDiffSplits <- as.character(all_df[[1]]$cladenames_post)
         
         listFrequencies <- as.numeric(all_df[[1]]$cladefreqs_post)
         
@@ -67,8 +67,8 @@ splitFreq <- function(runs, windows=FALSE){
             }
             
             count <- count+1
-            listSplits[[count]] <- vecSplits
-            names(listSplits[[count]]) <- vecNames
+            listDiffSplits[[count]] <- vecSplits
+            names(listDiffSplits[[count]]) <- vecNames
             listFrequencies[[count]] <- vecFreqs
             names(listFrequencies[[count]]) <- vecNames
           }
@@ -77,12 +77,12 @@ splitFreq <- function(runs, windows=FALSE){
       }
     }
     
-    listAll <- rbind(listSplits,listFrequencies)
+    listAll <- rbind(listDiffSplits,listFrequencies)
   }
   
   else{
     
-    listSplits <- list()
+    listDiffSplits <- list()
     listFrequencies <- list()
     count <- 0
     
@@ -115,13 +115,13 @@ splitFreq <- function(runs, windows=FALSE){
       }
       
       count <- count+1
-      listSplits[[count]] <- vecSplits
-      names(listSplits[[count]]) <- vecNames
+      listDiffSplits[[count]] <- vecSplits
+      names(listDiffSplits[[count]]) <- vecNames
       listFrequencies[[count]] <- vecFreqs
       names(listFrequencies[[count]]) <- vecNames
       
     }
-    listAll <- rbind(listSplits,listFrequencies)
+    listAll <- rbind(listDiffSplits,listFrequencies)
   }
   
   return(listAll)

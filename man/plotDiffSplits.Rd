@@ -4,7 +4,13 @@
 \alias{plotDiffSplits}
 \title{Plots the difference between splits of different runs}
 \usage{
-plotDiffSplits(output, minimumESS = 625, filename = NULL, ...)
+plotDiffSplits(
+  output,
+  minimumESS = 625,
+  fill_color = NULL,
+  filename = NULL,
+  ...
+)
 }
 \arguments{
 \item{output}{A list of convenience.diag type}
