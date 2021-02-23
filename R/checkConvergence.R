@@ -347,7 +347,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     if (length(my_runs) > 1){
       if ( length(output_tree_parameters_raw) > 3 & length(output_tree_parameters[[2]]) > 0 ){
         for (i in 1:length(output_tree_parameters[[2]])) {
-          split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
+          split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] <= 0))
         }
         names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
         decision_list_trees[[3]] <- split_freq_runs

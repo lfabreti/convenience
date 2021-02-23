@@ -45,7 +45,7 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
   }
   
   for (i in 1:length(frequencies)) {
-    if( frequencies[i] >=0.975 | frequencies[i] <=0.25 | is.na(frequencies[i]) ){
+    if( frequencies[i] >=0.975 | frequencies[i] <=0.025 | is.na(frequencies[i]) ){
       frequencies[i] <- NA
       differences[i] <- NA
     }
