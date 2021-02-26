@@ -243,20 +243,24 @@ essTracer <- function(input,stepSize = 1){
 expectedDiffSplits <- function(ess){
   
   prob <- vector()
-  expDiff <- vector()
+  threshold <- vector()
   for (p in 1:99/100) {
     exp_diff <- 0
+    probs <- array(0,ess+1)
     
     for (f1 in 0:ess) {
       for (f2 in 0:ess) {
         exp_diff <- exp_diff + abs( (f1/ess) - (f2/ess) ) * dbinom(f1, size = ess, prob = p) * dbinom(f2, size = ess, prob = p)
-        
+        diff <- abs(f1-f2)
+        probs[diff+1] <- probs[diff+1] + dbinom(f1, size = ess, prob = p) * dbinom(f2, size = ess, prob = p)
       }
     }
     prob <- c(prob, p)
-    expDiff <- c(expDiff, exp_diff)
+    cdf_diff <- cumsum(probs)
+    thresh <- (min(which( cdf_diff >= 0.95 ))-1) / ess
+    threshold <- c(threshold, thresh)
   }
-  return(rbind(prob,expDiff))
+  return(rbind(prob,threshold))
 }
 
 # This function takes the name of a format and returns a list containing important info about file suffixes and whatnot

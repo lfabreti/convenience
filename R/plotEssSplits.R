@@ -18,7 +18,7 @@ plotEssSplits <- function(x, precision = 0.01, fill_color = NULL, filename = NUL
   }
   
   if( !(is.null(filename)) ){
-    pdf(file = filename)
+    pdf(file = filename, width = 4.5, height = 4.5)
   }
   
   minimumESS <- minESS(precision)
@@ -42,7 +42,7 @@ plotEssSplits <- function(x, precision = 0.01, fill_color = NULL, filename = NUL
                border=F,
                ...)
   plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
-  plot <- axis(1, at = minimumESS)
+  #plot <- axis(1, at = minimumESS)
   
   if( !(is.null(filename)) ){
     dev.off()

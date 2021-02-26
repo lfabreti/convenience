@@ -14,7 +14,7 @@
 plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
   
   if( !(is.null(filename)) ){
-    pdf(file = filename)
+    pdf(file = filename, width = 6, height = 6)
   }
   
   minimumESS <- minESS(precision)
@@ -55,7 +55,7 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
          ...)
   }
   plot <- abline( v = minimumKS, col ="antiquewhite4", lwd=2, lty = 2)
-  plot <- axis(1, at = round(minimumKS, digits = 3))
+  #plot <- axis(1, at = round(minimumKS, digits = 3))
   
   legend("topright",
          legend = rownames(x$continuous_parameters$compare_runs),

@@ -18,7 +18,7 @@ plotEssContinuous <- function(x, precision = 0.01, fill_color = NULL, filename =
   }
   
   if( !(is.null(filename)) ){
-    pdf(file = filename)
+    pdf(file = filename, width = 4.5, height = 4.5)
   }
   
   minimumESS <- minESS(precision)
@@ -30,7 +30,7 @@ plotEssContinuous <- function(x, precision = 0.01, fill_color = NULL, filename =
   
   y_topLim <- max(hist(ESS_values, breaks = 20, plot = FALSE)$counts)
   
-  par(mar = c(3.9, 2.2, 2.1, 0.3))
+  par(mar = c(3.9, 2.2, 2.1, 1.0))
   plot <- hist( ESS_values, 
                 xlab = "ESS", 
                 ylab = NA,
@@ -43,7 +43,7 @@ plotEssContinuous <- function(x, precision = 0.01, fill_color = NULL, filename =
                 border=F,
                 ...)
   plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col = "antiquewhite4", lwd= 2, lty=2)
-  plot <- axis(1, at = minimumESS)
+  #plot <- axis(1, at = minimumESS)
   
   if( !(is.null(filename)) ){
     dev.off()
