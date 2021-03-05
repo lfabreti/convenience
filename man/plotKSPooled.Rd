@@ -4,7 +4,7 @@
 \alias{plotKSPooled}
 \title{Histogram of the KS values}
 \usage{
-plotKSPooled(x, bins, precision = 0.01, ...)
+plotKSPooled(x, bins, precision = 0.01, filename = NULL, ...)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}

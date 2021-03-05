@@ -4,16 +4,16 @@
 \alias{plotEssContinuous}
 \title{Histogram of the ESS values}
 \usage{
-plotEssContinuous(x, precision = 0.01, color = "grey", ...)
+plotEssContinuous(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}
 
 \item{precision}{The precision of the mean estimates. Default is 0.01}
 
-\item{color}{The color to fill the histogram bars, default is "grey"}
-
 \item{...}{(various) Additional arguments passed to plot().}
+
+\item{color}{The color to fill the histogram bars, default is "grey"}
 }
 \value{
 Histogram

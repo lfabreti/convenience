@@ -26,12 +26,18 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
     tree_ext="\\.t$"
 
   }else if(format == "beast"){
+    skip = 2
     log_ext = "\\.log$"
     tree_ext="\\.trees$"
 
   }else if(format == "*beast"){
+    skip = 2
     log_ext = "\\.log$"
     tree_ext="\\.species.trees$"
+
+  }else if(format == "phylobayes"){
+    log_ext = "\\.trace$"
+    tree_ext="\\.treelist$"
 
   }else{
     stop("Provide format!")
@@ -133,7 +139,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
     output_tmp <- output
 
     for (i in 1:length(output)) {
-      if( (length(output[[i]]$trees)) > mean ){
+      if( (length(output[[i]]$trees)) > mean*2 ){
         output_tmp <- output[-i]
       }
     }

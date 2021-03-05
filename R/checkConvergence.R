@@ -37,7 +37,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   }
   
   if ( is.null(control$namesToExclude) ){
-    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood"
+    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood|time|loglik|iter|topo|Replicate_ID"
   } else {
     namesToExclude <- control$namesToExclude
   }
@@ -99,8 +99,8 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
         for (j in index) {
           for (z in 1:length(splits_windows[2,i]$listFrequencies)) {
             if( exp_diff_windows[1,j] == splits_windows[2,i]$listFrequencies[z]){
-              results <- c(results, exp_diff_windows[2,j] - splits_windows[1,i]$listSplits[z])
-              vecNames <- c( vecNames, names(splits_windows[1,i]$listSplits[z]))
+              results <- c(results, exp_diff_windows[2,j] - splits_windows[1,i]$listDiffSplits[z])
+              vecNames <- c( vecNames, names(splits_windows[1,i]$listDiffSplits[z]))
             }
           }
         }
@@ -200,7 +200,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     ## Compare runs ##
     
     if( length(my_runs) > 1 ){
-      splits_runs <- splitFreq(my_runs, windows = F)
+      splits_runs <- output_tree_parameters_raw$frequencies
       
       if( minimumESS == 625) exp_diff_runs <- convenience::exp_diff_runs 
       else  exp_diff_runs <- expectedDiffSplits(minimumESS)
@@ -208,7 +208,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
       results_splits_runs <- list()
       if( length(splits_runs) > 0 ){
         for (i in 1:ncol(splits_runs)) {
-          splits_runs[2,i]$listFrequencies <- round(splits_runs[2,i]$listFrequencies, digits = 2)
+          splits_runs[2,][[i]] <- round(splits_runs[2,][[i]], digits = 2)
         }
         
         colnames(splits_runs) <- compar_names
@@ -216,14 +216,14 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
         
         for (i in 1:ncol(splits_runs)) {
           results <- vector()
-          index <- which( exp_diff_runs[1,] %in% splits_runs[2,i]$listFrequencies )
+          index <- which( exp_diff_runs[1,] %in% splits_runs[2,][[i]] )
           vecNames <- vector()
           
           for (j in index) {
-            for (z in 1:length(splits_runs[2,i]$listFrequencies)) {
-              if( exp_diff_runs[1,j] == splits_runs[2,i]$listFrequencies[z]){
-                results <- c(results, exp_diff_runs[2,j] - splits_runs[1,i]$listSplits[z])
-                vecNames <- c( vecNames, names(splits_runs[1,i]$listSplits[z]))
+            for (z in 1:length(splits_runs[2,][[i]])) {
+              if( exp_diff_runs[1,j] == splits_runs[2,][[i]][z]){
+                results <- c(results, (exp_diff_runs[2,j] - splits_runs[1,][[i]][z]))
+                vecNames <- c( vecNames, names(splits_runs[1,][[i]][z]))
               }
             }
           }
@@ -319,6 +319,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   count_decision <- 0
   
   
+  
   ##### ONLY TREE FILES #####
   
   # Check ess_runs_splits, results_splits, results_splits_runs
@@ -346,7 +347,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     if (length(my_runs) > 1){
       if ( length(output_tree_parameters_raw) > 3 & length(output_tree_parameters[[2]]) > 0 ){
         for (i in 1:length(output_tree_parameters[[2]])) {
-          split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] < 0))
+          split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] <= 0))
         }
         names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
         decision_list_trees[[3]] <- split_freq_runs
@@ -371,6 +372,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     }
     
   }
+  
   
   ##### ONLY LOG FILES #####
   
@@ -435,6 +437,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     }
     fails <- tmp
   }
+  
   
   ##### SUMMARIZING RESULTS #####
   
@@ -536,18 +539,24 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     
   }
   
-  ## Changing formats for better looking output ##
   
-  # format of splits comparison between runs
+  
+  ##### Changing formats for better looking output #####
+  
+  # format of diff splits comparison between runs
   tmp_freq <- list()
+  tmp_diff <- list()
   if( length(my_runs[[1]]$trees) > 0 ){
     if( length(my_runs) > 1){
       if( length(output_tree_parameters_raw$compare_runs) > 0 ){
         for (i in 1:ncol(output_tree_parameters_raw$compare_runs)) {
-          tmp_freq <- c(tmp_freq, output_tree_parameters_raw$compare_runs[1,i])
+          tmp_diff <- c(tmp_diff, output_tree_parameters_raw$compare_runs[1,i])
+          tmp_freq <- c(tmp_freq, output_tree_parameters_raw$compare_runs[2,i])
         }
+        names(tmp_diff) <- colnames(output_tree_parameters_raw$compare_runs)
         names(tmp_freq) <- colnames(output_tree_parameters_raw$compare_runs)
-        output_tree_parameters_raw$compare_runs <- tmp_freq
+        output_tree_parameters_raw$compare_runs <- tmp_diff
+        output_tree_parameters_raw$frequencies <- tmp_freq
         
       }
     }
@@ -558,26 +567,15 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   # format of ESS for splits
   if(length(my_runs[[1]]$trees) > 0){
     
-    if(length(my_runs) > 1){
-      df_1 <- plyr::ldply(output_tree_parameters_raw$compare_runs, rbind)
-      df_1 <- setNames(data.frame(t(df_1[,-1]), row.names = colnames(df_1)[-1]), df_1[,1])
-      colnames(df_1) <- names(output_tree_parameters_raw$compare_runs)
-      output_tree_parameters_raw$compare_runs <- df_1
-    }
+    #if(length(my_runs) > 1){
+     # df_1 <- plyr::ldply(output_tree_parameters_raw$compare_runs[1,], rbind)
+      #df_1 <- setNames(data.frame(t(df_1[,-1]), row.names = colnames(df_1)[-1]), df_1[,1])
+      #colnames(df_1) <- colnames(output_tree_parameters_raw$compare_runs)
+      #output_tree_parameters_raw$compare_runs <- df_1
+    #}
     
     df_2 <- plyr::ldply(ess_run_splits_aux, rbind)
     output_tree_parameters_raw$ess <- setNames(data.frame(t(df_2[,-1]), row.names = colnames(df_2)[-1]), df_2[,1])
-    
-    #format of frequencies
-    if( ncol(output_tree_parameters_raw$frequencies)  == 1 & length(my_runs) > 1 ){
-      df_3 <- plyr::ldply(output_tree_parameters_raw$frequencies, rbind)
-      output_tree_parameters_raw$frequencies <- setNames(data.frame(t(df_3[,-1]), row.names = colnames(df_3)[-1]), df_3[,1])
-      
-      output_tree_parameters_raw$frequencies <- rowSums(as.data.frame(output_tree_parameters_raw$frequencies))/ncol(output_tree_parameters_raw$frequencies)
-      output_tree_parameters_raw$frequencies <- as.data.frame(output_tree_parameters_raw$frequencies)
-    }else{
-      output_tree_parameters_raw$frequencies <- as.data.frame(t(output_tree_parameters_raw$frequencies))
-    }
   }
   
   
