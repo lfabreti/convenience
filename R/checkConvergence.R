@@ -237,6 +237,23 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
       output_tree_parameters$compare_runs <- results_splits_runs
     }
     
+    # Split frequency per run #
+    if(length(my_runs) > 1 ){
+      all_df <- vector("list", length = 0)
+      for (i in 1:length(my_runs)){
+        
+        x <- getInfo(my_runs, i, trees = TRUE)
+        cladefreqs <- clade.freq.named(x, start = 1, end = length(x))
+        
+        all_df[[i]] <- as.numeric(cladefreqs$cladefreqs_post)
+        names(all_df[[i]]) <- as.character(cladefreqs$cladenames_post)
+      }
+      df_freqs <- plyr::ldply(all_df, rbind)
+      df_freqs <- t(df_freqs)
+      colnames(df_freqs) <- names(my_runs)
+      output_tree_parameters_raw$freq_per_run <- df_freqs
+    }
+    
   }
   
   
@@ -566,14 +583,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   # format of ESS for splits
   if(length(my_runs[[1]]$trees) > 0){
-    
-    #if(length(my_runs) > 1){
-     # df_1 <- plyr::ldply(output_tree_parameters_raw$compare_runs[1,], rbind)
-      #df_1 <- setNames(data.frame(t(df_1[,-1]), row.names = colnames(df_1)[-1]), df_1[,1])
-      #colnames(df_1) <- colnames(output_tree_parameters_raw$compare_runs)
-      #output_tree_parameters_raw$compare_runs <- df_1
-    #}
-    
+
     df_2 <- plyr::ldply(ess_run_splits_aux, rbind)
     output_tree_parameters_raw$ess <- setNames(data.frame(t(df_2[,-1]), row.names = colnames(df_2)[-1]), df_2[,1])
   }

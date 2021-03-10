@@ -26,13 +26,6 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
     frequencies <- c(frequencies, as.vector(unlist(output$tree_parameters$frequencies[[i]])))
     differences <- c(differences, as.vector(unlist(output$tree_parameters$compare_runs[[i]])))
   }
-  
-  for (i in 1:length(frequencies)) {
-    if( frequencies[i] >=0.975 | frequencies[i] <=0.025 | is.na(frequencies[i]) ){
-      frequencies[i] <- NA
-      differences[i] <- NA
-    }
-  }
   frequencies <- frequencies[!is.na(frequencies)]
   differences <- differences[!is.na(differences)]
   

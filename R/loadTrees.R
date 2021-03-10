@@ -110,6 +110,12 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     to_add<-!(colnames(rb_ptable) %in% colnames(ptable))
     if(sum(to_add)>0)
       ptable<-cbind(rb_ptable[,to_add], ptable)
+    print("rerooting trees...")
+    outgroup_taxon = sort(treelist[[1]]$tip.label)[1]
+    for(i in 1:length(treelist)){
+      tmp = root(treelist[[i]],outgroup=outgroup_taxon)
+      treelist[[i]] <- unroot( tmp )
+    }
   }
   
   output <- list(

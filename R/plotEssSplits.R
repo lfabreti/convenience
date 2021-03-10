@@ -11,7 +11,7 @@
 #' 
 #' @export
 
-plotEssSplits <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+plotEssSplits <- function(x, per_run = FALSE, precision = 0.01, fill_color = NULL, filename = NULL, ...){
   
   if( is.null(fill_color) ){
     fill_color <- "coral3"
@@ -24,26 +24,54 @@ plotEssSplits <- function(x, precision = 0.01, fill_color = NULL, filename = NUL
   minimumESS <- minESS(precision)
   ESS_values <- vector()
   
-  for (i in 1:length(x$tree_parameters$ess)) {
-    ESS_values <- x$tree_parameters$ess[[i]]
+  if(per_run == TRUE){
+    n_runs <- ncol(x$tree_parameters$ess)
+    
+    par(mfrow = c(n_runs/2,n_runs/2), oma = c(1.5,0,1.5,0) + 0.1, mar = c(2,2,2.3,2))
+    layout(matrix(c(1:n_runs), nrow=n_runs/2, ncol = n_runs/2, byrow=TRUE))
+    
+    for (i in 1:n_runs) {
+      ESS_values <- x$tree_parameters$ess[,i]
+      ESS_values <- ESS_values[!is.na(ESS_values)]
+      y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
+      
+      plot <- hist(ESS_values, 
+                   xlab = NA, 
+                   ylab = NA,
+                   main = colnames(x$tree_parameters$ess)[i], 
+                   xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                   ylim = c(0, y_topLim + 1),
+                   col = fill_color,
+                   las = 1,
+                   border=F)
+                   #...)
+      plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
+    }
+    title(main = "ESS for splits per run", xlab = "ESS", outer = TRUE, line = 0.5)
+    
+    
+  } else{
+    
+    for (i in 1:length(x$tree_parameters$ess)) {
+      ESS_values <- x$tree_parameters$ess[[i]]
+    }
+    ESS_values <- ESS_values[!is.na(ESS_values)]
+    y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
+    
+    par(mar = c(3.9, 2.2, 2.1, 0.1))
+    plot <- hist(ESS_values, 
+                 xlab = "ESS", 
+                 ylab = NA,
+                 main = "Histogram of ESS for splits", 
+                 xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                 ylim = c(0, y_topLim + 1),
+                 col = fill_color,
+                 las = 1,
+                 border=F,
+                 ...)
+    plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
   }
-  ESS_values <- ESS_values[!is.na(ESS_values)]
-  y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
-  
-  par(mar = c(3.9, 2.2, 2.1, 0.1))
-  plot <- hist(ESS_values, 
-               xlab = "ESS", 
-               ylab = NA,
-               main = "Histogram of ESS for splits", 
-               xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
-               ylim = c(0, y_topLim + 1),
-               col = fill_color,
-               las = 1,
-               border=F,
-               ...)
-  plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
-  #plot <- axis(1, at = minimumESS)
-  
+
   if( !(is.null(filename)) ){
     dev.off()
   } 
