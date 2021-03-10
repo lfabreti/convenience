@@ -7,7 +7,7 @@
 #' @export
 
 loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, logfile=NA, skip=NA){
-
+  
   format <- tolower(format)
   format_choices <- c("mb", "beast", "*beast", "revbayes", "mrbayes", "phylobayes")
   format <- match.arg(format, format_choices)
@@ -17,18 +17,18 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     type_choices <- c("nexus", "newick")
     type <- match.arg(type, type_choices)
   }
-
+  
   file.format <- get.format(format)
-
+  
   if(is.na(type)){
     type <- file.format$type
   }
-
+  
   if(is.na(skip)){
     skip <- file.format$skip
   }
-
-
+  
+  
   # Read in trees
   print("Reading trees...")
   if(type == "nexus") {
@@ -40,14 +40,14 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
   } else {
     treelist <- read.tree(file=file)
   }
-
+  
   treelist <- treelist[seq(from=1, to=length(treelist), by=trim)]
-
+  
   if(is.na(gens.per.tree)){
     if(type=="revbayes") {
       gens.per.tree <- rb_ptable[2,"Iteration"] - rb_ptable[1,"Iteration"]
     } else {
-      #   "beast" | "*beast" | "mb" | "phylobayes"
+      #   "beast" | "*beast" | "mb" | "phylobayes" 
       if(!is.null(names(treelist))){
         gens.per.tree <- as.numeric(tail(strsplit(x=names(treelist)[3], split="[[:punct:]]")[[1]], 1)) -
           as.numeric(tail(strsplit(x=names(treelist)[2], split="[[:punct:]]")[[1]], 1))
@@ -55,9 +55,9 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
       else gens.per.tree <- 1
     }
   }
-
+  
   print(paste(gens.per.tree, "generations per tree..."))
-
+  
   # Unroot all trees.  Can't use lapply because it was
   # deleting tip labels.
   if(is.rooted(treelist[[1]])){
@@ -67,39 +67,33 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     }
   }
   else{print("Trees are unrooted...")}
-
-#  print("rerooting trees...")
-#  outgroup_taxon = sort(treelist[[1]]$tip.label)[1]
-#  for(i in 1:length(treelist)){
-#    tmp = root(treelist[[i]],outgroup=outgroup_taxon)
-#    treelist[[i]] <- unroot( tmp )
-#  }
-
+  
+  
   # Reset class
   class(treelist) <- "multiPhylo"
-
-
+  
+  
   ptable <- NULL
-
+  
   # Check whether log file path has been supplied and doesn't exist
   if(!is.na(logfile) && !file.exists(logfile)){
     stop(paste("Logfile not found at", logfile))
   }
-
+  
   # logfile path has been supplied and file exists
   if(!is.na(logfile) && file.exists(logfile)){
     print(paste("Reading parameter values from", basename(logfile)))
     ptable <- read.table(logfile, skip=skip, header=TRUE, comment.char = "")
     ptable <- ptable[seq(from=1, to=length(ptable[,1]), by=trim),]
   }
-
+  
   # If logfile hasn't been supplied try to find it by searching
   if(is.na(logfile)){
-
+    
     if(grepl(paste(file.format$trees.suffix, "$"), file)){
       logfile <- sub(pattern = paste0(file.format$trees.suffix, "$"), file.format$log.suffix, file)
     }
-
+    
     if(!is.na(logfile)){
       if(file.exists(logfile)){
         print(paste("Reading parameter values from", basename(logfile)))
@@ -110,7 +104,7 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
       }
     }
   }
-
+  
   # add any columns from rb_ptable (from treefile) that are not already in ptable (from log)
   if(format=="revbayes") {
     to_add<-!(colnames(rb_ptable) %in% colnames(ptable))
@@ -123,13 +117,13 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
       treelist[[i]] <- unroot( tmp )
     }
   }
-
+  
   output <- list(
     "trees" = treelist,
     "ptable" = ptable,
     "gens.per.tree" = gens.per.tree)
-
+  
   class(output) <- "rwty.chain"
-
+  
   output
 }
