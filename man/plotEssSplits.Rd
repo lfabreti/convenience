@@ -4,7 +4,14 @@
 \alias{plotEssSplits}
 \title{Histogram of the ESS values}
 \usage{
-plotEssSplits(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
+plotEssSplits(
+  x,
+  per_run = FALSE,
+  precision = 0.01,
+  fill_color = NULL,
+  filename = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}

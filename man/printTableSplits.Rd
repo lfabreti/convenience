@@ -4,7 +4,7 @@
 \alias{printTableSplits}
 \title{Prints the frequencies and ESS of the splits}
 \usage{
-printTableSplits(output, filename = NULL)
+printTableSplits(output, splits_per_run = FALSE, filename = NULL)
 }
 \arguments{
 \item{output}{A list of convenience.diag type}

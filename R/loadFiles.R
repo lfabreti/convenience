@@ -103,7 +103,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
       
       for (i in 1:length(logFiles)){
         
-        output[[i]] <- readTrace(logFiles[i], burnin = 0)
+        output[[i]] <- readTrace(logFiles[i], burnin = 0, skip = skip)
       }
     }
     
