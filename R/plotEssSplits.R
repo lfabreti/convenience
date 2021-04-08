@@ -43,8 +43,8 @@ plotEssSplits <- function(x, per_run = FALSE, precision = 0.01, fill_color = NUL
                    ylim = c(0, y_topLim + 1),
                    col = fill_color,
                    las = 1,
-                   border=F)
-                   #...)
+                   border=F,
+                   ...)
       plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
     }
     title(main = "ESS for splits per run", xlab = "ESS", outer = TRUE, line = 0.5)

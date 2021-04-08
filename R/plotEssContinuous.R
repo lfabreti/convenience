@@ -11,7 +11,7 @@
 #' 
 #' @export
 
-plotEssContinuous <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NULL,fill_color = NULL, filename = NULL, ...){
   
   if( is.null(fill_color) ){
     fill_color <- "cadetblue4"
@@ -21,29 +21,59 @@ plotEssContinuous <- function(x, precision = 0.01, fill_color = NULL, filename =
     pdf(file = filename, width = 4.5, height = 4.5)
   }
   
+  if(is.null(breaks)){
+    breaks <- 20
+  }
   minimumESS <- minESS(precision)
   ESS_values <- vector()
   
-  for (i in 1:ncol(x$continuous_parameters$ess)) {
-    ESS_values <- x$continuous_parameters$ess[,i]
+  if(per_run == TRUE){
+    n_runs <- ncol(x$continuous_parameters$ess)
+    
+    par(mfrow = c(n_runs/2,n_runs/2), oma = c(1.5,0,1.5,0) + 0.1, mar = c(2,2,2.3,2))
+    layout(matrix(c(1:n_runs), nrow=n_runs/2, ncol = n_runs/2, byrow=TRUE))
+    
+    for (i in 1:n_runs) {
+      ESS_values <- x$continuous_parameters$ess[,i]
+      ESS_values <- ESS_values[!is.na(ESS_values)]
+      y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
+      
+      plot <- hist(ESS_values, 
+                   xlab = NA, 
+                   ylab = NA,
+                   main = colnames(x$continuous_parameters$ess)[i], 
+                   xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                   ylim = c(0, y_topLim + 1),
+                   col = fill_color,
+                   las = 1,
+                   border=F,
+                   ...)
+      plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
+    }
+    title(main = "ESS for continuous parameters per run", xlab = "ESS", outer = TRUE, line = 0.5)
+    
+  }else {
+    for (i in 1:ncol(x$continuous_parameters$ess)) {
+      ESS_values <- x$continuous_parameters$ess[,i]
+    }
+    
+    y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
+    
+    par(mar = c(3.9, 2.2, 2.1, 1.0))
+    plot <- hist( ESS_values, 
+                  xlab = "ESS", 
+                  ylab = NA,
+                  main = "Histogram of ESS for continuous parameters",
+                  xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                  ylim = c(0, y_topLim+1),
+                  breaks = breaks,
+                  col = fill_color,
+                  las = 1,
+                  border=F,
+                  ...)
+    plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col = "antiquewhite4", lwd= 2, lty=2)
+    
   }
-  
-  y_topLim <- max(hist(ESS_values, breaks = 20, plot = FALSE)$counts)
-  
-  par(mar = c(3.9, 2.2, 2.1, 1.0))
-  plot <- hist( ESS_values, 
-                xlab = "ESS", 
-                ylab = NA,
-                main = "Histogram of ESS for continuous parameters",
-                xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
-                ylim = c(0, y_topLim+1),
-                breaks = 20,
-                col = fill_color,
-                las = 1,
-                border=F,
-                ...)
-  plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col = "antiquewhite4", lwd= 2, lty=2)
-  #plot <- axis(1, at = minimumESS)
   
   if( !(is.null(filename)) ){
     dev.off()
