@@ -64,6 +64,9 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   }else {
     my_runs <- loadFiles(list_files = list_files, format = format)
   }
+  if(burnin > 0){
+    my_runs <- removeBurnin(my_runs, burnin)
+  }
   
   #####   BURN-IN   #####
   print("Calculating burn-in")
@@ -164,7 +167,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     compar_names <- vector()
     for (r1 in 1:(length(my_runs)-1)) {
       for (r2 in (r1+1):length(my_runs)) {
-        compar_names <- c(compar_names, paste("Run", r1, "_Run_", r2, sep = ""))
+        compar_names <- c(compar_names, paste("Run_", r1, "_Run_", r2, sep = ""))
       }
     }
   }
@@ -459,6 +462,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   ##### SUMMARIZING RESULTS #####
   
   message_list <- list()
+  message_complete <- list()
   if(count_decision == 0){
     message_list <- paste(message_list, "ACHIEVED CONVERGENCE", "\n")
     message_list <- paste(message_list, " \n")
@@ -472,37 +476,39 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   message_list <- paste(message_list, "BURN-IN SET AT", burnin, "\n")
   message_list <- paste(message_list, " \n")
   
+  message_complete <- paste(message_list)
+  message_complete <- paste(message_complete, " \n")
   # reporting split with too high or too low frequency
   if( length(my_runs[[1]]$trees) > 0 ){
-    if ( length(output_tree_parameters_raw$exclude_high[[1]]) > 0 ) message_list <- paste(message_list, "SPLITS EXCLUDED FROM CONVERGENCE ASSESSMENT \n")
+    if ( length(output_tree_parameters_raw$exclude_high[[1]]) > 0 ) message_complete <- paste(message_complete, "SPLITS EXCLUDED FROM CONVERGENCE ASSESSMENT \n")
     for (i in 1:length(my_runs)) {
-      if ( length(output_tree_parameters_raw$exclude_high[[i]]) > 0 ) message_list <- paste(message_list, "FREQUENCY HIGHER THAN 0.975 FOR RUN", i, "\n")
+      if ( length(output_tree_parameters_raw$exclude_high[[i]]) > 0 ) message_complete <- paste(message_complete, "FREQUENCY HIGHER THAN 0.975 FOR RUN", i, "\n")
       if ( length(output_tree_parameters_raw$exclude_high[[i]]) > 0 ){
         for (j in 1:length(output_tree_parameters_raw$exclude_high[[i]])) {
-          message_list <- paste(message_list, "    ", output_tree_parameters_raw$exclude_high[[i]][j], "\n")
+          message_complete <- paste(message_complete, "    ", output_tree_parameters_raw$exclude_high[[i]][j], "\n")
         }
-        message_list <- paste(message_list, " \n")
+        message_complete <- paste(message_complete, " \n")
       }
-      if ( length(output_tree_parameters_raw$exclude_low[[i]]) > 0 ) message_list <- paste(message_list, "FREQUENCY LOWER THAN 0.025 FOR RUN", i, "\n")
+      if ( length(output_tree_parameters_raw$exclude_low[[i]]) > 0 ) message_complete <- paste(message_complete, "FREQUENCY LOWER THAN 0.025 FOR RUN", i, "\n")
       if ( length(output_tree_parameters_raw$exclude_low[[i]]) > 0 ){
         for (j in 1:length(output_tree_parameters_raw$exclude_low[[i]])) {
-          message_list <- paste(message_list, "    ", output_tree_parameters_raw$exclude_low[[i]][j], "\n")
+          message_complete <- paste(message_complete, "    ", output_tree_parameters_raw$exclude_low[[i]][j], "\n")
         }
-        message_list <- paste(message_list, " \n")
+        message_complete <- paste(message_complete, " \n")
       }
     }
   }
   
   # reportin cont param with no variance
   if( length(my_runs[[1]]$ptable) > 0 ){
-    if( length(output_continuous_parameters_raw$exclude[[1]]) > 0 ) message_list <- paste(message_list, "CONTINUOUS PARAMETERS WITH NO VARIANTION AND EXCLUDED FROM CONVERGENCE ASSESSMENT \n")
+    if( length(output_continuous_parameters_raw$exclude[[1]]) > 0 ) message_complete <- paste(message_complete, "CONTINUOUS PARAMETERS WITH NO VARIANTION AND EXCLUDED FROM CONVERGENCE ASSESSMENT \n")
     for (i in 1:length(my_runs)) {
-      if( length(output_continuous_parameters_raw$exclude[[i]]) > 0 ) message_list <- paste(message_list, "RUN", i, "\n")
+      if( length(output_continuous_parameters_raw$exclude[[i]]) > 0 ) message_complete <- paste(message_complete, "RUN", i, "\n")
       if( length(output_continuous_parameters_raw$exclude[[i]]) > 0 ){
         for (j in 1:length(output_continuous_parameters_raw$exclude[[i]])) {
-          message_list <- paste(message_list, "    ", output_continuous_parameters_raw$exclude[[i]][j], "\n")
+          message_complete <- paste(message_complete, "    ", output_continuous_parameters_raw$exclude[[i]][j], "\n")
         }
-        message_list <- paste(message_list, " \n")
+        message_complete <- paste(message_complete, " \n")
       }
     }
   }
@@ -510,19 +516,25 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   # reporting split with lowest ESS
   if( length(my_runs[[1]]$trees) > 0 ){
     message_list <- paste(message_list, "LOWEST SPLIT ESS \n")
+    message_complete <- paste(message_complete, "LOWEST SPLIT ESS \n")
     for (i in 1:length(my_runs)) {
       message_list <- paste(message_list, "     RUN", i, "->", names(which.min(output_tree_parameters_raw$ess[[i]])), round(min(output_tree_parameters_raw$ess[[i]], na.rm = T), digits = 2), "\n")
+      message_complete <- paste(message_complete, "     RUN", i, "->", names(which.min(output_tree_parameters_raw$ess[[i]])), round(min(output_tree_parameters_raw$ess[[i]], na.rm = T), digits = 2), "\n")
     }
     message_list <- paste(message_list, " \n")
+    message_complete <- paste(message_complete, " \n")
   }
   
   # reporting cont param with lowest ESS
   if( length(my_runs[[1]]$ptable) > 0 ){
     message_list <- paste(message_list, "LOWEST CONTINUOUS PARAMETER ESS \n")
+    message_complete <- paste(message_complete, "LOWEST CONTINUOUS PARAMETER ESS \n")
     for (i in 1:length(my_runs)){
-      message_list <- paste(message_list, "     RUN", i, "->", row.names(output_continuous_parameters_raw$ess)[which.min(output_continuous_parameters_raw$ess[[i]])],  round(min(output_continuous_parameters_raw$ess[[i]]), digits = 2), "\n") 
+      message_list <- paste(message_list, "     RUN", i, "->", row.names(output_continuous_parameters_raw$ess)[which.min(output_continuous_parameters_raw$ess[[i]])],  round(min(output_continuous_parameters_raw$ess[[i]]), digits = 2), "\n")
+      message_complete <- paste(message_complete, "     RUN", i, "->", row.names(output_continuous_parameters_raw$ess)[which.min(output_continuous_parameters_raw$ess[[i]])],  round(min(output_continuous_parameters_raw$ess[[i]]), digits = 2), "\n")
     }
     message_list <- paste(message_list, " \n")
+    message_complete <- paste(message_complete, " \n")
   }
   
   # reporting commands that the user can use to visualize the output
@@ -540,14 +552,19 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     if( length(my_runs) > 0 ) message_list <- paste(message_list, "     Difference in frequencies: output$tree_parameters$compare_runs \n")
     message_list <- paste(message_list, " \n")
   }
+  message_list <- paste(message_list, "To check the full summary message with splits and parameters excluded from the analysis type: \n")
+  message_list <- paste(message_list, "     output$message_complete \n")
   
   class(message_list) <- "list.fails"
+  class(message_complete) <- "list.fails"
   
   if(count_decision == 0){
     final_output$message <- message_list
+    final_output$message_complete <- message_complete
     final_output$converged <- TRUE
   }else{
     final_output$message <- message_list
+    final_output$message_complete <- message_complete
     final_output$converged <- FALSE
     final_output$failed <- fails
     final_output$failed_names <- fails_names

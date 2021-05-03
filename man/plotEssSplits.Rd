@@ -7,6 +7,7 @@
 plotEssSplits(
   x,
   per_run = FALSE,
+  breaks = NULL,
   precision = 0.01,
   fill_color = NULL,
   filename = NULL,

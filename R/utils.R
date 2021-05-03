@@ -334,13 +334,13 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
       if( typeof(cont_param) == "list"){
         all_wind <- vector("list", length = 0)
         len_run <- length(cont_param[[1]])
+        second <- (1*(0.2*len_run))
         third <- (2*(0.2*len_run))
         fourth <- (3*(0.2*len_run))
         fifth <- (4*(0.2*len_run))
         
         # gets the third window of the run
-        all_wind[[1]] <- as.data.frame(cont_param[third:fourth,])
-        names(all_wind[[1]]) <- names(cont_param)
+        all_wind[[1]] <- as.data.frame(cont_param[1:second,]) # check first and last  window
         #gets the fifth window of the run
         all_wind[[2]] <- as.data.frame(cont_param[fifth:len_run,])
         names(all_wind[[2]]) <- names(cont_param)
@@ -350,12 +350,13 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
       else{
         all_wind <- vector("list", length = 0)
         len_run <- length(cont_param)
+        second <- (1*(0.2*len_run))
         third <- (2*(0.2*len_run))
         fourth <- (3*(0.2*len_run))
         fifth <- (4*(0.2*len_run))
         
         # gets the third window of the run
-        all_wind[[1]] <- cont_param[third:fourth]
+        all_wind[[1]] <- cont_param[1:second]
         #gets the fifth window of the run
         all_wind[[2]] <- cont_param[fifth:len_run]
         return(all_wind)
@@ -371,12 +372,13 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
     else{
       all_wind <- vector("list", length = 0)
       len_run <- length(x)
+      second <- (1*(0.2*len_run))
       third <- (2*(0.2*len_run))
       fourth <- (3*(0.2*len_run))
       fifth <- (4*(0.2*len_run))
       
       #gets the third window of the run
-      all_wind[[1]] <- x[third:fourth]
+      all_wind[[1]] <- x[1:second]
       #gets the fifth window of the run
       all_wind[[2]] <- x[fifth:len_run]
       return(all_wind)
@@ -393,11 +395,12 @@ ksThreshold <- function(alpha, ess){
 # Function to create control argument for checkConvergence
 makeControl <- function( tracer = NULL, burnin = NULL, precision = NULL, namesToExclude = NULL ){
   control <- vector(mode = "list", length = 4)
+  names(control) <- c("tracer", "burnin", "precision", "namesToExclude")
   control$tracer <- tracer
   control$burnin <- burnin
   control$precision <- precision
   control$namesToExclude <- namesToExclude
-  names(control) <- c("tracer", "burnin", "precision", "namesToExclude")
+  #names(control) <- c("tracer", "burnin", "precision", "namesToExclude")
   return(control)
 }
 
