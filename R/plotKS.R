@@ -14,6 +14,8 @@
 
 plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...){
   
+  col_threshold <- "gray69"
+  
   if( is.null(fill_color) ){
     fill_color <- "cadetblue4"
   }
@@ -32,20 +34,29 @@ plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
   }
   y_topLim <- max(hist(KS_values, plot = FALSE)$counts)
   
-  par(mar = c(3.9, 2.2, 2.1, 1.0))
+  par(mar = c(3.9, 3.9, 2.1, 1.0))
+  
+  plot <- plot(NA,
+               xlab = "Kolmogorov-Smirnov score",
+               ylab = "Counts",
+               main = "Kolmogorov-Smirnov test",
+               xlim = c( (min(minimumKS, KS_values) - 0.01), (max(minimumKS, KS_values) + 0.01)  ),
+               ylim = c(0,y_topLim + 1),
+               las=1,
+               bty="l")
+  plot <- rect(xleft = min(minimumKS, KS_values) - 0.01, ybottom = 0, xright = minimumKS, ytop = y_topLim+1, border = NA, col = "gray89")
+  plot <- lines(x = c(minimumKS,minimumKS),y=c(0,y_topLim+1), col = col_threshold, lwd= 2, lty = 2)
+  
+  
   plot <- hist(KS_values, 
-               xlab = "KS score",
-               ylab = NA,
-               main = "KS histogram",
                xlim = c( (min(minimumKS, KS_values) - 0.01), (max(minimumKS, KS_values) + 0.01)  ),
                ylim = c(0,y_topLim + 1),
                col = fill_color,
                border=F,
                las = 1,
+               add=T,
                ...)
 
-  plot <- lines(x = c(minimumKS,minimumKS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty = 2)
-  #plot <- axis(1, at = round(minimumKS, digits = 3))
   
   if( !(is.null(filename)) ){
     dev.off()

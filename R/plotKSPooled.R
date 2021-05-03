@@ -30,11 +30,21 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
   
   colors_hist <- viridis(length(ks_values))
   
-  par(mar = c(3.9, 1.87, 3.1, 5.0), xpd=F)
+  par(mar = c(3.9, 3.9, 3.1, 5.0), xpd=F)
+  plot <- plot(NA,
+               xlab = "Kolmogorov-Smirnov score",
+               ylab = "Counts",
+               main = "Kolmogorov-Smirnov test",
+               xlim = c( (min(minimumKS, unlist(ks_values)) - 0.01), (max(minimumKS, unlist(ks_values)) + 0.01) ),
+               ylim = c( 0, (length(ks_values[[1]])- 2) ),
+               las=1,
+               bty="l")
+  
+  plot <- lines(x = c(minimumKS,minimumKS),y=c(0,y_topLim+1), col = col_threshold, lwd= 2, lty = 2)
+  plot <- rect(xleft = min(minimumKS, unlist(ks_values)) - 0.01, ybottom = 0, xright = minimumKS, ytop = length(ks_values[[1]])- 2, border = NA, col = "gray89")
+  
+  
   plot <- hist(ks_values[[1]],
-               xlab = "KS score", 
-               ylab = NA,
-               main = "KS histogram",
                xlim = c( (min(minimumKS, unlist(ks_values)) - 0.01), (max(minimumKS, unlist(ks_values)) + 0.01) ),
                ylim = c( 0, (length(ks_values[[1]])- 2) ),
                breaks = break_values,
@@ -42,6 +52,7 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
                border = T,
                yaxs="i",
                las = 1,
+               add=T,
                ...)
   
   for (i in 2:length(ks_values)) {
@@ -55,7 +66,6 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
          ...)
   }
   plot <- abline( v = minimumKS, col ="antiquewhite4", lwd=2, lty = 2)
-  #plot <- axis(1, at = round(minimumKS, digits = 3))
   
   legend("topright",
          legend = rownames(x$continuous_parameters$compare_runs),

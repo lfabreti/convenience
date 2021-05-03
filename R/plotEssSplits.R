@@ -11,10 +11,16 @@
 #' 
 #' @export
 
-plotEssSplits <- function(x, per_run = FALSE, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+  
+  col_threshold <- "gray69"
   
   if( is.null(fill_color) ){
-    fill_color <- "coral3"
+    fill_color <- "seagreen4"
+  }
+  
+  if(is.null(breaks)){
+    breaks <- 50
   }
   
   if( !(is.null(filename)) ){
@@ -27,7 +33,7 @@ plotEssSplits <- function(x, per_run = FALSE, precision = 0.01, fill_color = NUL
   if(per_run == TRUE){
     n_runs <- ncol(x$tree_parameters$ess)
     
-    par(mfrow = c(n_runs/2,n_runs/2), oma = c(1.5,0,1.5,0) + 0.1, mar = c(2,2,2.3,2))
+    par(mfrow = c(n_runs/2,n_runs/2), oma = c(1.5,1.5,1.5,0) + 0.1, mar = c(2,2,2.3,2))
     layout(matrix(c(1:n_runs), nrow=n_runs/2, ncol = n_runs/2, byrow=TRUE))
     
     for (i in 1:n_runs) {
@@ -35,19 +41,31 @@ plotEssSplits <- function(x, per_run = FALSE, precision = 0.01, fill_color = NUL
       ESS_values <- ESS_values[!is.na(ESS_values)]
       y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
       
+      plot <- plot(NA,
+                   xlab = NA, 
+                   ylab = NA,
+                   main = colnames(x$tree_parameters$ess)[i],
+                   xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                   ylim = c(0, y_topLim+1),
+                   las=1,
+                   bty="l")
+      plot <- rect(xleft = minimumESS, ybottom = 0, xright = max(minimumESS, ESS_values)+1000, ytop = y_topLim+1, border = NA, col = "gray89")
+      plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  col_threshold, lwd= 2, lty=2)
+      
+      
+      
+      
       plot <- hist(ESS_values, 
                    xlab = NA, 
                    ylab = NA,
-                   main = colnames(x$tree_parameters$ess)[i], 
                    xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
                    ylim = c(0, y_topLim + 1),
+                   border = F,
                    col = fill_color,
-                   las = 1,
-                   border=F,
+                   add=T,
                    ...)
-      plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
     }
-    title(main = "ESS for splits per run", xlab = "ESS", outer = TRUE, line = 0.5)
+    title(main = "Effective Sample Size for splits per run", xlab = "Effective Sample Size", ylab = "Counts", outer = TRUE, line = 0.5)
     
     
   } else{
@@ -56,20 +74,32 @@ plotEssSplits <- function(x, per_run = FALSE, precision = 0.01, fill_color = NUL
       ESS_values <- x$tree_parameters$ess[[i]]
     }
     ESS_values <- ESS_values[!is.na(ESS_values)]
-    y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
+    y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
     
-    par(mar = c(3.9, 2.2, 2.1, 0.1))
-    plot <- hist(ESS_values, 
-                 xlab = "ESS", 
-                 ylab = NA,
-                 main = "Histogram of ESS for splits", 
+    par(mar = c(3.9, 3.9, 2.1, 0.1))
+    
+    plot <- plot(NA,
+                 xlab = "Effective Sample Size", 
+                 ylab = "Counts",
+                 main = "Effective Sample Size for splits",
+                 xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                 ylim = c(0, y_topLim+1),
+                 las=1,
+                 bty="l")
+    plot <- rect(xleft = minimumESS, ybottom = 0, xright = max(minimumESS, ESS_values)+1000, ytop = y_topLim+1, border = NA, col = "gray89")
+    plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col = col_threshold, lwd= 2, lty=2)
+    
+    
+    
+    
+    plot <- hist(ESS_values,
                  xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
                  ylim = c(0, y_topLim + 1),
+                 breaks = breaks,
+                 border = F,
                  col = fill_color,
-                 las = 1,
-                 border=F,
+                 add=T,
                  ...)
-    plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  "antiquewhite4", lwd= 2, lty=2)
   }
 
   if( !(is.null(filename)) ){

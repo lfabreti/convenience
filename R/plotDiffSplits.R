@@ -9,8 +9,10 @@
 
 plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, ...){
   
+  col_threshold <- "gray69"
+  
   if( is.null(fill_color) ){
-    fill_color <- "coral3"
+    fill_color <- "seagreen4"
   }
   
   if( !(is.null(filename)) ){
@@ -20,11 +22,41 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
   if( minimumESS == 625) exp_diff_runs <- convenience::exp_diff_runs 
   else  exp_diff_runs <- expectedDiffSplits(minimumESS)
   
+  ## Calculate the minimum ESS between runs for each split
+  ess_min_between_runs <- matrix(ncol=length(output$tree_parameters$frequencies), nrow=nrow(output$tree_parameters$ess))
+  n_runs <- length(output$tree_parameters$ess)
+  count <-1
+  for (i in 1:(n_runs-1)) {
+    for (j in (i+1):n_runs) {
+      for (z in 1:nrow(output$tree_parameters$ess)) {
+        ess_min_between_runs[z,count] <- min(output$tree_parameters$ess[z,i], output$tree_parameters$ess[z,j], na.rm = T)
+      }
+      count <- count + 1
+    }
+  }
+  row.names(ess_min_between_runs) <- row.names(output$tree_parameters$ess)
+  
   frequencies <- vector()
   differences <- vector()
+  freq_low_ess <- vector()
+  diff_low_ess <- vector()
   for (i in 1:length(output$tree_parameters$frequencies)) {
-    frequencies <- c(frequencies, as.vector(unlist(output$tree_parameters$frequencies[[i]])))
-    differences <- c(differences, as.vector(unlist(output$tree_parameters$compare_runs[[i]])))
+    for (j in names(output$tree_parameters$frequencies[[i]])) {
+      if ( j %in% row.names(ess_min_between_runs)){
+        if ( ess_min_between_runs[j, i] < minimumESS ){
+          freq_low_ess <- c( freq_low_ess, as.vector(unlist(output$tree_parameters$frequencies[[i]][j])) )
+          diff_low_ess <- c( diff_low_ess, as.vector(unlist(output$tree_parameters$compare_runs[[i]][j])) )
+        }
+        else{
+          frequencies <- c( frequencies, as.vector(unlist(output$tree_parameters$frequencies[[i]][j])) )
+          differences <- c( differences, as.vector(unlist(output$tree_parameters$compare_runs[[i]][j])) )
+        }
+      }
+      else{
+        frequencies <- c( frequencies, as.vector(unlist(output$tree_parameters$frequencies[[i]][j])) )
+        differences <- c( differences, as.vector(unlist(output$tree_parameters$compare_runs[[i]][j])) )
+      }
+    }
   }
   frequencies <- frequencies[!is.na(frequencies)]
   differences <- differences[!is.na(differences)]
@@ -33,7 +65,7 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
   y_axis <- exp_diff_runs[2,]
   
   y_lim <- max(differences, y_axis, na.rm = T)
-  y_lim <- y_lim + 0.5*y_lim
+  y_lim <- y_lim + 0.7*y_lim
   
   par(mar = c(3.9, 4.9, 2.1, 1.3))
   plot <- plot(NA, 
@@ -44,11 +76,26 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
                ylim = c(0.0, y_lim),
                las = 1)
   
-  plot <- lines(x_axis, y_axis, col = "antiquewhite4", lwd=3)
+  plot <- polygon(x_axis, y_axis, col = "gray89", border = NA)
+  x_extra <- c(0.0, 0.01, 0.99, 1.0, 0.0)
+  y_extra <- c(0.0, min(y_axis), min(y_axis), 0.0, 0.0)
+  plot <- polygon(x_extra, y_extra, border = NA, col = "gray89")
+  plot <- lines(x_axis, y_axis, col = col_threshold, lwd=2)
   title(xlab = "Split frequency", outer = T, line = -1.1)
   title(ylab = "Difference between splits", outer = T, line = -1.1)
   
   plot <- points(frequencies, differences, pch = 16, col = fill_color)
+  if (length(freq_low_ess) > 0){
+    plot <- points(freq_low_ess, diff_low_ess, pch = 16, col = "tan1")
+    legend("topright",
+           legend = c(paste("ESS",expression("<"),minimumESS),paste("ESS",expression(">"),minimumESS)),
+           pch = c(16,16), 
+           col = c("tan1",fill_color),
+           box.lty = 2,
+           box.col="gray7",
+           cex = 0.7,
+           inset = 0.01)
+  }
  
   if( !(is.null(filename)) ){
     dev.off()
