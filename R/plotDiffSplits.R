@@ -64,14 +64,15 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
   x_axis <- exp_diff_runs[1,]
   y_axis <- exp_diff_runs[2,]
   
-  y_lim <- max(differences, y_axis, na.rm = T)
-  y_lim <- y_lim + 0.7*y_lim
+  y_lim <- max(differences, y_axis, diff_low_ess, na.rm = T)
+  y_lim <- y_lim + y_lim*0.5
   
-  par(mar = c(3.9, 4.9, 2.1, 1.3))
+  par(mar = c(4.1, 4.9, 2.1, 1.3))
   plot <- plot(NA, 
                xlab = NA,
                ylab = NA,
                main = "Difference in Split Frequencies", 
+               cex.main = 0.9,
                xlim = c(0.0,1.0), 
                ylim = c(0.0, y_lim),
                las = 1)

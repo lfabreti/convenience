@@ -11,10 +11,16 @@
 #' 
 #' @export
 
-plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
+plotKSPooled <- function(x, precision = 0.01, bins = NULL, filename = NULL, ...){
+  
+  col_threshold <- "gray69"
   
   if( !(is.null(filename)) ){
     pdf(file = filename, width = 6, height = 6)
+  }
+  
+  if( (is.null(bins)) ){
+    bins <- 10
   }
   
   minimumESS <- minESS(precision)
@@ -30,17 +36,18 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
   
   colors_hist <- viridis(length(ks_values))
   
-  par(mar = c(3.9, 3.9, 3.1, 5.0), xpd=F)
+  par(mar = c(4.1, 3.9, 3.1, 5.5), xpd=F)
   plot <- plot(NA,
                xlab = "Kolmogorov-Smirnov score",
                ylab = "Counts",
                main = "Kolmogorov-Smirnov test",
+               cex.main = 0.9,
                xlim = c( (min(minimumKS, unlist(ks_values)) - 0.01), (max(minimumKS, unlist(ks_values)) + 0.01) ),
                ylim = c( 0, (length(ks_values[[1]])- 2) ),
                las=1,
                bty="l")
   
-  plot <- lines(x = c(minimumKS,minimumKS),y=c(0,y_topLim+1), col = col_threshold, lwd= 2, lty = 2)
+  plot <- lines(x = c(minimumKS,minimumKS),y=c(0,length(ks_values[[1]])- 2), col = col_threshold, lwd= 2, lty = 2)
   plot <- rect(xleft = min(minimumKS, unlist(ks_values)) - 0.01, ybottom = 0, xright = minimumKS, ytop = length(ks_values[[1]])- 2, border = NA, col = "gray89")
   
   
@@ -71,7 +78,7 @@ plotKSPooled <- function(x, bins, precision = 0.01, filename = NULL, ...){
          legend = rownames(x$continuous_parameters$compare_runs),
          fill = scales::alpha(colors_hist,.7),
          box.lty = 0,
-         inset=c(-0.18,0),
+         inset=c(-0.25,0),
          cex = 0.9,
          xpd=T
          )

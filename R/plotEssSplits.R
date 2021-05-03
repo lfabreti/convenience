@@ -20,7 +20,7 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
   }
   
   if(is.null(breaks)){
-    breaks <- 50
+    breaks <- 10
   }
   
   if( !(is.null(filename)) ){
@@ -40,16 +40,17 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
       ESS_values <- x$tree_parameters$ess[,i]
       ESS_values <- ESS_values[!is.na(ESS_values)]
       y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
+      x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/4
       
       plot <- plot(NA,
                    xlab = NA, 
                    ylab = NA,
                    main = colnames(x$tree_parameters$ess)[i],
-                   xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                   xlim = c(0, x_topLim ),
                    ylim = c(0, y_topLim+1),
                    las=1,
                    bty="l")
-      plot <- rect(xleft = minimumESS, ybottom = 0, xright = max(minimumESS, ESS_values)+1000, ytop = y_topLim+1, border = NA, col = "gray89")
+      plot <- rect(xleft = minimumESS, ybottom = 0, xright = x_topLim, ytop = y_topLim+1, border = NA, col = "gray89")
       plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  col_threshold, lwd= 2, lty=2)
       
       
@@ -58,42 +59,44 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
       plot <- hist(ESS_values, 
                    xlab = NA, 
                    ylab = NA,
-                   xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                   xlim = c(0, x_topLim ),
                    ylim = c(0, y_topLim + 1),
                    border = F,
                    col = fill_color,
                    add=T,
                    ...)
     }
-    title(main = "Effective Sample Size for splits per run", xlab = "Effective Sample Size", ylab = "Counts", outer = TRUE, line = 0.5)
+    title(main = "Effective Sample Size for splits per run", cex.main = 0.9, xlab = "Effective Sample Size", ylab = "Counts", outer = TRUE, line = 0.5)
     
     
   } else{
     
     for (i in 1:length(x$tree_parameters$ess)) {
-      ESS_values <- x$tree_parameters$ess[[i]]
+      ESS_values <- c(ESS_values, x$tree_parameters$ess[[i]])
     }
     ESS_values <- ESS_values[!is.na(ESS_values)]
+    x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/4
     y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
     
-    par(mar = c(3.9, 3.9, 2.1, 0.1))
+    par(mar = c(4.1, 3.9, 2.1, 1.0))
     
     plot <- plot(NA,
                  xlab = "Effective Sample Size", 
                  ylab = "Counts",
                  main = "Effective Sample Size for splits",
-                 xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                 cex.main = 0.9,
+                 xlim = c(0, x_topLim ),
                  ylim = c(0, y_topLim+1),
                  las=1,
                  bty="l")
-    plot <- rect(xleft = minimumESS, ybottom = 0, xright = max(minimumESS, ESS_values)+1000, ytop = y_topLim+1, border = NA, col = "gray89")
+    plot <- rect(xleft = minimumESS, ybottom = 0, xright = x_topLim, ytop = y_topLim+1, border = NA, col = "gray89")
     plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col = col_threshold, lwd= 2, lty=2)
     
     
     
     
     plot <- hist(ESS_values,
-                 xlim = c(0, (max(minimumESS, ESS_values)+1000) ),
+                 xlim = c(0, x_topLim ),
                  ylim = c(0, y_topLim + 1),
                  breaks = breaks,
                  border = F,

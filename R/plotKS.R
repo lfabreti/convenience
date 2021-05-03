@@ -34,12 +34,13 @@ plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
   }
   y_topLim <- max(hist(KS_values, plot = FALSE)$counts)
   
-  par(mar = c(3.9, 3.9, 2.1, 1.0))
+  par(mar = c(4.1, 3.9, 2.1, 1.0))
   
   plot <- plot(NA,
                xlab = "Kolmogorov-Smirnov score",
                ylab = "Counts",
                main = "Kolmogorov-Smirnov test",
+               cex.main = 0.9,
                xlim = c( (min(minimumKS, KS_values) - 0.01), (max(minimumKS, KS_values) + 0.01)  ),
                ylim = c(0,y_topLim + 1),
                las=1,
