@@ -1,10 +1,11 @@
 Package: convenience
 Type: Package
 Title: Convergence assessment for phylogenetic inferience
+Description: Convergence assessment for phylogenetic inferience
 Version: 0.0.1
-Authors: Luiza Fabreti, Sebastian Hoehna and Andy Magee
-Maintaners: Luiza Fabreti
-License: What license it uses
+Author: Luiza Fabreti, Sebastian Hoehna and Andy Magee
+Maintainer: Luiza Fabreti <l.fabreti@lmu.de>
+License: GPL(>= 3)
 Encoding: UTF-8
 LazyData: true
 Depends: 
@@ -15,7 +16,7 @@ Depends:
     utils,
 	viridis,
 	scales,
-    R (>= 2.10)
+    R (>= 3.5.0)
 LinkingTo: Rcpp
 Imports: 
     Rcpp
