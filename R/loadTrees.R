@@ -42,6 +42,9 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
   }
   
   treelist <- treelist[seq(from=1, to=length(treelist), by=trim)]
+  # Reset class
+  class(treelist) <- "multiPhylo"
+  treelist <- ape::.compressTipLabel(treelist) # saves memory
   
   if(is.na(gens.per.tree)){
     if(type=="revbayes") {
@@ -58,20 +61,12 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
   
   print(paste(gens.per.tree, "generations per tree..."))
   
-  # Unroot all trees.  Can't use lapply because it was
-  # deleting tip labels.
+  # Unroot all trees. 
   if(is.rooted(treelist[[1]])){
     print("Unrooting, this may take a while...")
-    for(i in 1:length(treelist)){
-      treelist[[i]] <- unroot(treelist[[i]])
-    }
+    treelist <- unroot(treelist) # unroot is generic and maybe faster
   }
   else{print("Trees are unrooted...")}
-  
-  
-  # Reset class
-  class(treelist) <- "multiPhylo"
-  
   
   ptable <- NULL
   
@@ -113,10 +108,9 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     print("rerooting trees...")
     outgroup_taxon = sort(treelist[[1]]$tip.label)[1]
     print(paste("Outgroup",outgroup_taxon))
-    for(i in 1:length(treelist)){
-      tmp = root(treelist[[i]],outgroup=outgroup_taxon)
-      treelist[[i]] <- unroot( tmp )
-    }
+    # why is this needed?    
+    tmp <- root(treelist ,outgroup=outgroup_taxon) # root is also generic 
+    treelist <- unroot( tmp )
   }
   
   output <- list(
