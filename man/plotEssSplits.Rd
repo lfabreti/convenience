@@ -17,11 +17,17 @@ plotEssSplits(
 \arguments{
 \item{x}{A list of convenience.diag type}
 
+\item{per_run}{If the plot should combine all runs or plot each run separately. Default value is FALSE}
+
+\item{breaks}{The number of bins to determine the intervals of the histogram}
+
 \item{precision}{The precision of the mean estimates. Default is 0.01}
 
-\item{...}{(various) Additional arguments passed to plot().}
+\item{fill_color}{The color to fill the histogram bars}
 
-\item{color}{The color to fill the histogram bars, default is "grey"}
+\item{filename}{The name of the file to save the plot}
+
+\item{...}{(various) Additional arguments passed to plot().}
 }
 \value{
 Histogram

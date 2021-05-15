@@ -14,7 +14,7 @@ ksTest(runs, windows = FALSE, namesToExclude)
 \item{namesToExclude}{Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior}
 }
 \value{
-
+data frame of KS values
 }
 \description{
 Calculates the KS test for the comparison between runs or windows of the same run

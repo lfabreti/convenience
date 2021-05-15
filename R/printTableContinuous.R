@@ -1,5 +1,7 @@
 #' Prints the means and the ESS of the continuous parameters
 #' 
+#' @importFrom utils write.csv
+#' 
 #' @param output A list of convenience.diag type
 #' @param filename A filename to save the table, if NULL the table will be printed
 #'  

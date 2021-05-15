@@ -4,14 +4,16 @@
 \alias{plotKSPooled}
 \title{Histogram of the KS values}
 \usage{
-plotKSPooled(x, bins, precision = 0.01, filename = NULL, ...)
+plotKSPooled(x, precision = 0.01, bins = NULL, filename = NULL, ...)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}
 
+\item{precision}{The precision of the mean estimates. Default is 0.01}
+
 \item{bins}{The number of bins to determine the intervals of the histogram}
 
-\item{precision}{The precision of the mean estimates. Default is 0.01}
+\item{filename}{The name of the file to save the plot}
 
 \item{...}{(various) Additional arguments passed to plot().}
 }

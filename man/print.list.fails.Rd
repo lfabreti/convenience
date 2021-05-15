@@ -4,10 +4,12 @@
 \alias{print.list.fails}
 \title{Print method for list.fails}
 \usage{
-\method{print}{list.fails}(x)
+\method{print}{list.fails}(x, ...)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}
+
+\item{...}{(various) Additional arguments}
 }
 \description{
 Print method for list.fails

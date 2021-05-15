@@ -5,6 +5,8 @@
 #' Finds trees and log files based on format definition, returns rwty.chain objects containing both
 #'
 #' @param path The path to the directory containing tree and log files
+#' @param tree_files The list of tree files when the path is not provided
+#' @param log_files The list of log files when the path is not provided
 #' @param format File format, which is used to find tree and log files
 #' Currently accepted values "revbayes" for RevBayes, "mb" for MrBayes, "beast" for Beast and "*beast" for StarBeast
 #' @param labels A vector of names to assign to chains as they are read in

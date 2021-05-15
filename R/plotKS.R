@@ -2,9 +2,13 @@
 #' 
 #' Plots the histogram of the KS values for the combination of all runs. The MCMC must have at least 2 runs
 #' 
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics abline hist layout legend lines par points polygon rect title
+#' 
 #' @param x A list of convenience.diag type
 #' @param precision The precision of the mean estimates. Default is 0.01
-#' @param color The color to fill the histogram bars, default is "grey"
+#' @param fill_color The color to fill the histogram bars
+#' @param filename The name of the file to save the plot
 #' @param ... (various) Additional arguments passed to plot().
 #' 
 #' @return Histogram

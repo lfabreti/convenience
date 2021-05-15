@@ -4,10 +4,12 @@
 \alias{print.convenience.table}
 \title{Print method for convenience.table}
 \usage{
-\method{print}{convenience.table}(x)
+\method{print}{convenience.table}(x, ...)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}
+
+\item{...}{(various) Additional arguments}
 }
 \description{
 Print method for convenience.table

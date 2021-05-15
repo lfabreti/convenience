@@ -2,15 +2,21 @@
 #' 
 #' Check output from phylogenetic MCMC analysis for convergence diagnostics
 #' 
+#' @importFrom plyr ldply
+#' @importFrom stats var setNames
+#' 
 #' @param path Path to directory containing all files from the same analysis
 #' @param list_files List of files to check for convergence
-#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"
+#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"
 #' @param control List of arguments to the function. Includes tracer (to calculate the ESS with Tracer method), burn-in, precision and names of parameters to exclude from the analysis
 #' 
 #' @return List of type convenience.diag
 #' 
 #' @examples 
-#' checkConvergence( path = "example/4_runs" )
+#' \dontrun{
+#' checkConvergence( path ,
+#'  format = "revbayes" )
+#' }
 #' 
 #' @export
 
@@ -19,7 +25,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   ##### First let's check the function arguments #####
   if( is.null(control$tracer) ){
-    tracer <- FALSE
+    tracer <- TRUE
   } else {
     tracer <- control$tracer
   }
@@ -78,7 +84,10 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     if( length(my_runs[[1]]$trees) > 0 ){
       
       splits_windows <- splitFreq(my_runs, windows = T)
-      if( minimumESS_windows == 125 ) exp_diff_windows <- convenience::exp_diff_windows
+      if( minimumESS_windows == 125 ) {
+        fdir <- system.file("thresholds/expectedDiff_125.rds", package = "convenience")
+        exp_diff_windows <- readRDS(fdir)
+      }
       else exp_diff_windows <- expectedDiffSplits(minimumESS_windows)
       
       for (i in 1:ncol(splits_windows)) {
@@ -205,7 +214,10 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     if( length(my_runs) > 1 ){
       splits_runs <- output_tree_parameters_raw$frequencies
       
-      if( minimumESS == 625) exp_diff_runs <- convenience::exp_diff_runs 
+      if( minimumESS == 625) {
+        fdir <- system.file("thresholds/expectedDiff_625.rds", package = "convenience")
+        exp_diff_runs <- readRDS(fdir)
+      }
       else  exp_diff_runs <- expectedDiffSplits(minimumESS)
       
       results_splits_runs <- list()

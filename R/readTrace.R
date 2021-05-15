@@ -9,6 +9,8 @@
 #' If the trace contains vectors of vectors and the user does not specify
 #' format = "complex", readTrace() will read in those columns as factors
 #' rather than as numeric vectors.
+#' 
+#' @importFrom utils read.table
 #'
 #' @param paths (vector of character strings; no default) File path(s) to trace file.
 #' @param format (single character string; default = simple) Indicates type of
@@ -21,6 +23,7 @@
 #' @param check.names (logical; default = FALSE) Passed to utils::read.table(); indicates
 #' if utils::read.table() should check column names and replace syntactically invalid
 #' characters.
+#' @param skip Number of lines to skip before reading the data from the log file.
 #' @param ... (various) Additional arguments passed to utils::read.table().
 #'
 #' @return List of dataframes (of length 1 if only 1 log file provided).

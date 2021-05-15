@@ -16,7 +16,7 @@ checkConvergence(
 
 \item{list_files}{List of files to check for convergence}
 
-\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"}
+\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"}
 
 \item{control}{List of arguments to the function. Includes tracer (to calculate the ESS with Tracer method), burn-in, precision and names of parameters to exclude from the analysis}
 }
@@ -27,6 +27,9 @@ List of type convenience.diag
 Check output from phylogenetic MCMC analysis for convergence diagnostics
 }
 \examples{
-checkConvergence( path = "example/4_runs" )
+\dontrun{
+checkConvergence( path ,
+ format = "revbayes" )
+}
 
 }

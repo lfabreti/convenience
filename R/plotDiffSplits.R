@@ -1,7 +1,11 @@
 #' Plots the difference between splits of different runs
 #' 
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics abline hist layout legend lines par points polygon rect title
+#' 
 #' @param output A list of convenience.diag type
 #' @param minimumESS The threshold for the ESS, default value is 625
+#' @param fill_color The color for the dots on the plot
 #' @param filename A filename to save the table, if NULL the table will be printed
 #' @param ... (various) Additional arguments passed to plot()
 #'  
@@ -19,7 +23,10 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
     pdf(file = filename, width = 4.5, height = 4.5)
   }
   
-  if( minimumESS == 625) exp_diff_runs <- convenience::exp_diff_runs 
+  if( minimumESS == 625) {
+    fdir <- system.file("thresholds/expectedDiff_625.rds", package = "convenience")
+    exp_diff_runs <- readRDS(fdir)
+  } 
   else  exp_diff_runs <- expectedDiffSplits(minimumESS)
   
   ## Calculate the minimum ESS between runs for each split

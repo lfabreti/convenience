@@ -2,11 +2,13 @@
 #' 
 #' Calculates the KS test for the comparison between runs or windows of the same run
 #' 
+#' @importFrom stats ks.test
+#' 
 #' @param runs A list of rwty.chain type
 #' @param windows A boolean to set if the calculation is within runs or between runs
 #' @param namesToExclude Column names to exclude from the calculations, default = bl, Iteration, Likelihood, Posterior, Prior
 #' 
-#' @return 
+#' @return data frame of KS values
 #' 
 #' @export
 

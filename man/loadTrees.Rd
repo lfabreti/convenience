@@ -14,6 +14,21 @@ loadTrees(
   skip = NA
 )
 }
+\arguments{
+\item{file}{The tree file}
+
+\item{type}{The type of tree file}
+
+\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"}
+
+\item{gens.per.tree}{Number of generations between sampled trees}
+
+\item{trim}{Increment for the sequence of trees to read}
+
+\item{logfile}{The log files from the MCMC}
+
+\item{skip}{Number of lines to skip before reading the data from the log file}
+}
 \value{
 output A list of rwty.chain objects containing the multiPhylos and the tables of values from the log files if available
 }

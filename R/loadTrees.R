@@ -1,6 +1,14 @@
 #' Modified from RWTY
 #'
-#'  Loads trees, looks for a log file of tree likelihoods and parameter values, returns an rwty.chain object containing both
+#' Loads trees, looks for a log file of tree likelihoods and parameter values, returns an rwty.chain object containing both
+#' 
+#' @param file The tree file 
+#' @param type The type of tree file
+#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"
+#' @param gens.per.tree Number of generations between sampled trees
+#' @param trim Increment for the sequence of trees to read
+#' @param logfile The log files from the MCMC
+#' @param skip Number of lines to skip before reading the data from the log file
 #'
 #' @return output A list of rwty.chain objects containing the multiPhylos and the tables of values from the log files if available
 #'
@@ -49,8 +57,8 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     } else {
       #   "beast" | "*beast" | "mb" | "phylobayes" 
       if(!is.null(names(treelist))){
-        gens.per.tree <- as.numeric(tail(strsplit(x=names(treelist)[3], split="[[:punct:]]")[[1]], 1)) -
-          as.numeric(tail(strsplit(x=names(treelist)[2], split="[[:punct:]]")[[1]], 1))
+        gens.per.tree <- as.numeric(utils::tail(strsplit(x=names(treelist)[3], split="[[:punct:]]")[[1]], 1)) -
+          as.numeric(utils::tail(strsplit(x=names(treelist)[2], split="[[:punct:]]")[[1]], 1))
       }
       else gens.per.tree <- 1
     }
@@ -62,15 +70,17 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
   # deleting tip labels.
   if(is.rooted(treelist[[1]])){
     print("Unrooting, this may take a while...")
-    for(i in 1:length(treelist)){
-      treelist[[i]] <- unroot(treelist[[i]])
-    }
+    treelist <- unroot(treelist)
+    #for(i in 1:length(treelist)){
+    #  treelist[[i]] <- unroot(treelist[[i]])
+    #}
   }
   else{print("Trees are unrooted...")}
   
   
   # Reset class
   class(treelist) <- "multiPhylo"
+  treelist <- ape::.compressTipLabel(treelist) # saves memory
   
   
   ptable <- NULL
@@ -113,10 +123,12 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     print("rerooting trees...")
     outgroup_taxon = sort(treelist[[1]]$tip.label)[1]
     print(paste("Outgroup",outgroup_taxon))
-    for(i in 1:length(treelist)){
-      tmp = root(treelist[[i]],outgroup=outgroup_taxon)
-      treelist[[i]] <- unroot( tmp )
-    }
+    treelist <- root(treelist, outgroup=outgroup_taxon)
+    treelist <- unroot(treelist)
+    #for(i in 1:length(treelist)){
+    #  tmp = root(treelist[[i]],outgroup=outgroup_taxon)
+    #  treelist[[i]] <- unroot( tmp )
+    #}
   }
   
   output <- list(

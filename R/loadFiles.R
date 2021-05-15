@@ -4,7 +4,7 @@
 #' 
 #' @param path The path to the folder with all the output
 #' @param list_files List of files with the output
-#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"
+#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"
 #' @param tree_name The name of the column containing the trees, default = "psi"
 #' 
 #' @return List of type rwty.chain
@@ -60,7 +60,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
     if ( any(character_paths_are_strings == FALSE) == TRUE ) {
       # print out the ones that are not character strings
       cat( "Some paths are not character strings:",
-           paste0("\t",paths[character_paths_are_strings == FALSE]), sep="\n")
+           paste0("\t",path[character_paths_are_strings == FALSE]), sep="\n")
       stop()
     }
     
@@ -99,7 +99,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
     }
     # list of files is provided
     else{
-      output <- list()
+      output <- vector("list", length(logFiles))
       
       for (i in 1:length(logFiles)){
         
@@ -112,7 +112,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
   # Log files and tree files
   else{
 
-    all_vecs <- vector("list", length = 0)
+    all_vecs <- vector("list", length(treeFiles))
     
     for(i in 1:length(treeFiles)){
       all_vecs[[i]] <- paste("run_", i, sep = "")

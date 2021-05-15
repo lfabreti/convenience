@@ -1,10 +1,17 @@
 #' Utilities
 #' 
+#' Internal functions of the package
+#' 
 #' @import Rcpp
+#' @import ape
+#' @import coda
+#' @import rwty
+#' @importFrom stats dbinom quantile sd
 #' @importFrom Rcpp evalCpp
 #' @export makeControl
 #' @export ksThreshold
-
+#' 
+#' 
 #' @useDynLib convenience
 #' @importFrom Rcpp sourceCpp
 NULL
@@ -386,22 +393,9 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
   }
 }
 
-# Calculates the threshold for the KS test
-ksThreshold <- function(alpha, ess){
-  c_alpha <- sqrt( -(log(alpha/2)) * 0.5) 
-  return( (c_alpha*sqrt((2*ess)/(ess*ess))) )
-}
-
-# Function to create control argument for checkConvergence
-makeControl <- function( tracer = NULL, burnin = NULL, precision = NULL, namesToExclude = NULL ){
-  control <- vector(mode = "list", length = 4)
-  names(control) <- c("tracer", "burnin", "precision", "namesToExclude")
-  control$tracer <- tracer
-  control$burnin <- burnin
-  control$precision <- precision
-  control$namesToExclude <- namesToExclude
-  #names(control) <- c("tracer", "burnin", "precision", "namesToExclude")
-  return(control)
+# From RWTY
+isTree<-function(x) {
+  !is.null(try(read.tree(text=x)))
 }
 
 # Calculates min ESS according to the std error of the mean
@@ -412,11 +406,6 @@ minESS <- function(per){
 # Calculates the 2.5 and 97.5 quantiles of a dataframe
 quants <- function(x){
   return(quantile(x,probs = c(0.025, 0.975)))
-}
-
-# From RWTY
-isTree<-function(x) {
-  !is.null(try(read.tree(text=x)))
 }
   
 # From RWTY
@@ -440,6 +429,6 @@ read.revbayestrees<-function(file) {
 
 # Calculate standard error
 se <- function(x){
-  effSamSize <- ess(x)
+  effSamSize <- essTracerC(x)
   return(sd(x)/sqrt(effSamSize))
 }

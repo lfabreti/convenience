@@ -2,9 +2,15 @@
 #' 
 #' Plots the histogram of the ESS values for the continuous parameters
 #' 
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics abline hist layout legend lines par points polygon rect title
+#' 
 #' @param x A list of convenience.diag type
+#' @param per_run If the plot should combine all runs or plot each run separately. Default value is FALSE
 #' @param precision The precision of the mean estimates. Default is 0.01
-#' @param color The color to fill the histogram bars, default is "grey"
+#' @param breaks The number of bins to determine the intervals of the histogram
+#' @param fill_color The color to fill the histogram bars
+#' @param filename The name of the file to save the plot
 #' @param ... (various) Additional arguments passed to plot().
 #' 
 #' @return Histogram
@@ -39,7 +45,7 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
       ESS_values <- x$continuous_parameters$ess[,i]
       ESS_values <- ESS_values[!is.na(ESS_values)]
       y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
-      x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/4
+      x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
       
       plot <- plot(NA,
                    xlab = NA, 
@@ -70,7 +76,7 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     }
     
     y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
-    x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/4
+    x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
     
     par(mar = c(4.1, 3.9, 2.1, 1.0))
     plot <- plot(NA,

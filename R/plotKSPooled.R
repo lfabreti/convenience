@@ -2,9 +2,15 @@
 #' 
 #' Plots the histogram of the KS values for the one-on-one comparison of runs. The MCMC must have at least 3 runs
 #' 
+#' @importFrom viridis viridis
+#' @importFrom scales alpha
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics abline hist layout legend lines par points polygon rect title
+#' 
 #' @param x A list of convenience.diag type
-#' @param bins The number of bins to determine the intervals of the histogram
 #' @param precision The precision of the mean estimates. Default is 0.01
+#' @param bins The number of bins to determine the intervals of the histogram
+#' @param filename The name of the file to save the plot
 #' @param ... (various) Additional arguments passed to plot().
 #' 
 #' @return Histogram
@@ -34,7 +40,7 @@ plotKSPooled <- function(x, precision = 0.01, bins = NULL, filename = NULL, ...)
   increment <- (max( unlist(ks_values)) - min(unlist(ks_values)) ) / bins
   break_values <- seq( from = min(unlist(ks_values)), to = max( unlist(ks_values)), by = increment )
   
-  colors_hist <- viridis(length(ks_values))
+  colors_hist <- viridis::viridis(length(ks_values))  
   
   par(mar = c(4.1, 3.9, 3.1, 5.5), xpd=F)
   plot <- plot(NA,

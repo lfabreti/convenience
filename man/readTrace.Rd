@@ -31,6 +31,8 @@ value provided is greater than 1).}
 if utils::read.table() should check column names and replace syntactically invalid
 characters.}
 
+\item{skip}{Number of lines to skip before reading the data from the log file.}
+
 \item{...}{(various) Additional arguments passed to utils::read.table().}
 }
 \value{

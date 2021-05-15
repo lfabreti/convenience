@@ -9,6 +9,8 @@ printTableSplits(output, splits_per_run = FALSE, filename = NULL)
 \arguments{
 \item{output}{A list of convenience.diag type}
 
+\item{splits_per_run}{When set to TRUE, shows the information for the splits for each run}
+
 \item{filename}{A filename to save the table, if NULL the table will be printed}
 }
 \description{

@@ -1,23 +1,26 @@
 Package: convenience
 Type: Package
-Title: Convergence assessment for phylogenetic inferience
-Description: Convergence assessment for phylogenetic inferience
-Version: 0.0.1
+Title: Convergence assessment for phylogenetic inference
+Description: Convergence assessment for phylogenetic inference.
+Version: 1.0.0
 Author: Luiza Fabreti, Sebastian Hoehna and Andy Magee
 Maintainer: Luiza Fabreti <l.fabreti@lmu.de>
 License: GPL(>= 3)
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    ape,
+    ape (>= 5.5),
     coda,
-    mcmcse,
     rwty,
-    utils,
-	viridis,
-	scales,
     R (>= 3.5.0)
 LinkingTo: Rcpp
 Imports: 
-    Rcpp
+    Rcpp,
+    scales,
+    viridis,
+    plyr,
+    utils,
+    grDevices,
+    graphics,
+    stats
 RoxygenNote: 7.1.1

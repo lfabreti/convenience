@@ -11,7 +11,7 @@ loadFiles(path = NULL, list_files = NULL, format, tree_name = "psi")
 
 \item{list_files}{List of files with the output}
 
-\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast"}
+\item{format}{The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"}
 
 \item{tree_name}{The name of the column containing the trees, default = "psi"}
 }

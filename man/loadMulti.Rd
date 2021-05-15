@@ -16,6 +16,10 @@ loadMulti(
 \arguments{
 \item{path}{The path to the directory containing tree and log files}
 
+\item{tree_files}{The list of tree files when the path is not provided}
+
+\item{log_files}{The list of log files when the path is not provided}
+
 \item{format}{File format, which is used to find tree and log files
 Currently accepted values "revbayes" for RevBayes, "mb" for MrBayes, "beast" for Beast and "*beast" for StarBeast}
 

@@ -1,6 +1,9 @@
 #' Prints the frequencies and ESS of the splits
 #' 
+#' @importFrom utils write.csv
+#' 
 #' @param output A list of convenience.diag type
+#' @param splits_per_run When set to TRUE, shows the information for the splits for each run
 #' @param filename A filename to save the table, if NULL the table will be printed
 #'  
 #' @export
