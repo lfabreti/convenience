@@ -16,18 +16,4 @@ You can install the package using devtools:
 
 ## Tutorial
 
-A tutorial can be found in [Convergence Tutorial](https://revbayes.github.io/tutorials/convergence/)
-
-
-
-## Example
-
- `library(convenience)`<br />
- `setwd(example/4_runs/)`<br />
- `checkConvergence(path = ".", list_files = NULL, control= makeControl())`<br />
- 
-
-
-
-
- 
+A tutorial can be found in [Convergence Tutorial](https://revbayes.github.io/tutorials/convergence/) 
