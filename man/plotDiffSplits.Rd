@@ -9,6 +9,7 @@ plotDiffSplits(
   minimumESS = 625,
   fill_color = NULL,
   filename = NULL,
+  per_run = FALSE,
   ...
 )
 }
@@ -20,6 +21,8 @@ plotDiffSplits(
 \item{fill_color}{The color for the dots on the plot}
 
 \item{filename}{A filename to save the table, if NULL the table will be printed}
+
+\item{per_run}{If the plot should distinguish the pairwise comparison between runs with different symbols. Default value is FALSE}
 
 \item{...}{(various) Additional arguments passed to plot()}
 }
