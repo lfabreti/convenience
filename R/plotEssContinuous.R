@@ -30,7 +30,7 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
   }
   
   if(is.null(breaks)){
-    breaks <- 10
+    breaks <- seq(0, (max(minimumESS, ESS_values))+100, 25)
   }
   minimumESS <- minESS(precision)
   ESS_values <- vector()

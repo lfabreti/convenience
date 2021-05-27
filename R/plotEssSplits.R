@@ -26,7 +26,7 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
   }
   
   if(is.null(breaks)){
-    breaks <- 10
+    breaks <- seq(0, (max(minimumESS, ESS_values))+100, 25)
   }
   
   if( !(is.null(filename)) ){

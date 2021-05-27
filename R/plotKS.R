@@ -56,6 +56,7 @@ plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
   plot <- hist(KS_values, 
                xlim = c( (min(minimumKS, KS_values) - 0.01), (max(minimumKS, KS_values) + 0.01)  ),
                ylim = c(0,y_topLim + 1),
+               breaks = seq(0, max(minimumKS, KS_values)+0.01, 0.0023),
                col = fill_color,
                border=F,
                las = 1,
