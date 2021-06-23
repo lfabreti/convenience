@@ -29,9 +29,6 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     pdf(file = filename, width = 4.5, height = 4.5)
   }
   
-  if(is.null(breaks)){
-    breaks <- seq(0, (max(minimumESS, ESS_values))+100, 25)
-  }
   minimumESS <- minESS(precision)
   ESS_values <- vector()
   
@@ -44,6 +41,11 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     for (i in 1:n_runs) {
       ESS_values <- x$continuous_parameters$ess[,i]
       ESS_values <- ESS_values[!is.na(ESS_values)]
+      
+      if(is.null(breaks)){
+        breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+      }
+      
       y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
       x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
       
@@ -74,8 +76,11 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     for (i in 1:ncol(x$continuous_parameters$ess)) {
       ESS_values <- c(ESS_values, x$continuous_parameters$ess[,i])
     }
+    if(is.null(breaks)){
+      breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+    }
     
-    y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
+    y_topLim <- max(hist(ESS_values, breaks = 10, plot = FALSE)$counts)
     x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
     
     par(mar = c(4.1, 3.9, 2.1, 1.0))

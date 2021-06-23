@@ -25,10 +25,6 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
     fill_color <- "seagreen4"
   }
   
-  if(is.null(breaks)){
-    breaks <- seq(0, (max(minimumESS, ESS_values))+100, 25)
-  }
-  
   if( !(is.null(filename)) ){
     pdf(file = filename, width = 4.5, height = 4.5)
   }
@@ -45,6 +41,10 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
     for (i in 1:n_runs) {
       ESS_values <- x$tree_parameters$ess[,i]
       ESS_values <- ESS_values[!is.na(ESS_values)]
+      if(is.null(breaks)){
+        breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+      }
+      
       y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
       x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
       
@@ -82,6 +82,11 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
       ESS_values <- c(ESS_values, x$tree_parameters$ess[[i]])
     }
     ESS_values <- ESS_values[!is.na(ESS_values)]
+    
+    if(is.null(breaks)){
+      breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+    }
+    
     x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
     y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
     

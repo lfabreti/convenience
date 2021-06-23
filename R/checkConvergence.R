@@ -382,7 +382,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
           split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] <= 0))
         }
         names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
-        decision_list_trees[[3]] <- split_freq_runs
+        decision_list_trees[[2]] <- split_freq_runs
         for (i in 1:length(decision_list_trees[[2]])) {
           if ( length(decision_list_trees[[2]][[i]]) > 0 ){
             fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[2]][i])))
