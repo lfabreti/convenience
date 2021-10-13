@@ -38,7 +38,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
     n_param <- length(vecEss)/length(runs)
     name_param <- names(vecEss[1:n_param])
     
-    df_ess <- data.frame(matrix(unlist(vecEss), nrow = n_param, byrow = T), stringsAsFactors = F)
+    df_ess <- data.frame(matrix(unlist(vecEss), nrow = n_param, byrow = F), stringsAsFactors = F)
     rownames(df_ess) <- name_param
     
     for (i in 1:ncol(df_ess)) {

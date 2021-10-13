@@ -76,6 +76,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   #####   BURN-IN   #####
   print("Calculating burn-in")
+  my_runs_aux <- my_runs
   while (burnin <= 0.5) {
     
     list_control <- 0 
@@ -164,7 +165,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     
     if(list_control > 0){
       burnin <- burnin + 0.1
-      my_runs <- removeBurnin(my_runs, burnin)
+      my_runs <- removeBurnin(my_runs_aux, burnin)
     } 
     else break
     
