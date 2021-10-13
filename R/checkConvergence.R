@@ -474,6 +474,8 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   ##### SUMMARIZING RESULTS #####
   
+  final_output$burnin <- burnin
+  
   message_list <- list()
   message_complete <- list()
   if(count_decision == 0){
@@ -585,8 +587,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     class(final_output$failed) <- "list.fails"
     
   }
-  
-  
   
   ##### Changing formats for better looking output #####
   
