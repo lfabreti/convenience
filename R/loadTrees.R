@@ -71,9 +71,6 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
   if(is.rooted(treelist[[1]])){
     print("Unrooting, this may take a while...")
     treelist <- unroot(treelist)
-    #for(i in 1:length(treelist)){
-    #  treelist[[i]] <- unroot(treelist[[i]])
-    #}
   }
   else{print("Trees are unrooted...")}
   
@@ -93,7 +90,7 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
   # logfile path has been supplied and file exists
   if(!is.na(logfile) && file.exists(logfile)){
     print(paste("Reading parameter values from", basename(logfile)))
-    ptable <- read.table(logfile, skip=skip, header=TRUE, comment.char = "")
+    ptable <- read.table(logfile, skip=skip, header=TRUE, sep = "\t", comment.char = "")
     ptable <- ptable[seq(from=1, to=length(ptable[,1]), by=trim),]
   }
   
@@ -107,8 +104,8 @@ loadTrees <- function(file, type=NA, format = "mb", gens.per.tree=NA, trim=1, lo
     if(!is.na(logfile)){
       if(file.exists(logfile)){
         print(paste("Reading parameter values from", basename(logfile)))
-        ptable <- read.table(logfile, skip=skip, header=TRUE)
-        ptable <- ptable[seq(from=1, to=length(ptable[,1]), by=trim),]
+        ptable <- read.table(logfile, skip=skip, header=TRUE, sep = "\t")
+        #ptable <- ptable[seq(from=1, to=length(ptable[,1]), by=trim),]
       } else {
         print(paste("Couldn't find", basename(logfile)))
       }

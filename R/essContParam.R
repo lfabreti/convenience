@@ -22,7 +22,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
       if ( typeof(cont_param) == "list" ){
         for (rows in 1:length(cont_param)) {
           
-          if ( is.nan( effectiveSize(cont_param[[rows]]) ) ) {
+          if ( is.nan( essTracerC(cont_param[[rows]]) ) ) {
             print(paste(names(cont_param[rows]), " ess is not a number!"))
           }
         }

@@ -16,7 +16,7 @@
 #' @param format (single character string; default = simple) Indicates type of
 #' MCMC trace, complex indicates cases where trace contains vectors of vectors/
 #' matrices - mnStochasticVariable monitor will sometimes be of this type.
-#' @param delim (single character string; default = "\\t") Delimiter of file.
+#' @param delim (single character string) Delimiter of file.
 #' @param burnin (single numeric value; default = 0.1) Fraction of generations to
 #' discard (if value provided is between 0 and 1) or number of generations (if
 #' value provided is greater than 1).
@@ -39,7 +39,7 @@
 #' @export
 
 readTrace <- function(paths, format = "simple",
-                      delim="\t", burnin = 0.1, check.names = FALSE, skip, ...){
+                      delim, burnin = 0, check.names = FALSE, skip, ...){
   
   # enforce argument matching
   
