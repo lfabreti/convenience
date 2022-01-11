@@ -155,7 +155,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     
     if( length(my_runs[[1]]$trees) > 0 & length(my_runs[[1]]$ptable) > 0 ){
       for (i in 1:length(results_splits)) {
-        if( length(results_splits[[i]]) > 0 | ks_windows[i,] < 0) list_control <- list_control+1
+        if( length(results_splits[[i]]) > 0 | any(ks_windows[i,] < 0) ) list_control <- list_control+1
       }
     } else if ( length(my_runs[[1]]$ptable) == 0){
       for (i in 1:length(results_splits)) {
