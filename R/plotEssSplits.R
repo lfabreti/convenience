@@ -17,7 +17,7 @@
 #' 
 #' @export
 
-plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
   
   col_threshold <- "gray69"
   
@@ -73,7 +73,9 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
                    add=T,
                    ...)
     }
-    title(main = "Effective Sample Size for splits per run", cex.main = 0.9, xlab = "Effective Sample Size", ylab = "Counts", outer = TRUE, line = 0.5)
+    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
+    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
+    title(main = "Effective Sample Size for splits per run", cex.main = 0.9, xlab = xlab, ylab = ylab, outer = TRUE, line = 0.5)
     
     
   } else{
@@ -91,10 +93,11 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
     y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
     
     par(mar = c(4.1, 3.9, 2.1, 1.0))
-    
+    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
+    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
     plot <- plot(NA,
-                 xlab = "Effective Sample Size", 
-                 ylab = "Counts",
+                 xlab = xlab, 
+                 ylab = ylab,
                  main = "Effective Sample Size for splits",
                  cex.main = 0.9,
                  xlim = c(0, x_topLim ),

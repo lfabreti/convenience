@@ -12,7 +12,7 @@
 #'  
 #' @export
 
-plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, per_run = FALSE, ...){
+plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, per_run = FALSE, xlab = NULL, ylab = NULL, ...){
   
   col_threshold <- "gray69"
   
@@ -75,8 +75,6 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
     list_diff_low_ess[[i]] <- diff_low_ess
     
   }
-  #frequencies <- frequencies[!is.na(frequencies)]
-  #differences <- differences[!is.na(differences)]
   
   x_axis <- exp_diff_runs[1,]
   y_axis <- exp_diff_runs[2,]
@@ -101,8 +99,10 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
   plot <- polygon(x_extra, y_extra, border = NA, col = "gray89")
   plot <- lines(x_axis, y_axis, col = col_threshold, lwd=2)
   
-  title(xlab = "Split frequency", outer = T, line = -1.1)
-  title(ylab = "Difference between splits", outer = T, line = -1.1)
+  if( is.null(xlab)) xlab <- "Split frequency" else xlab <- xlab
+  if( is.null(ylab)) ylab <- "Difference between splits" else ylab <- ylab
+  title(xlab = xlab, outer = T, line = -1.1)
+  title(ylab = ylab, outer = T, line = -1.1)
   
   if( length(output$tree_parameters$frequencies) > 1 & per_run == TRUE ){
     

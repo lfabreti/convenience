@@ -16,7 +16,7 @@
 #' @export
 
 
-plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
   
   col_threshold <- "gray69"
   
@@ -39,10 +39,11 @@ plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
   y_topLim <- max(hist(KS_values, plot = FALSE)$counts)
   
   par(mar = c(4.1, 3.9, 2.1, 1.0))
-  
+  if( is.null(xlab)) xlab <- "Kolmogorov-Smirnov score" else xlab <- xlab
+  if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
   plot <- plot(NA,
-               xlab = "Kolmogorov-Smirnov score",
-               ylab = "Counts",
+               xlab = xlab,
+               ylab = ylab,
                main = "Kolmogorov-Smirnov test",
                cex.main = 0.9,
                xlim = c( (min(minimumKS, KS_values) - 0.01), (max(minimumKS, KS_values) + 0.01)  ),

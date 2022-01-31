@@ -10,6 +10,8 @@ plotDiffSplits(
   fill_color = NULL,
   filename = NULL,
   per_run = FALSE,
+  xlab = NULL,
+  ylab = NULL,
   ...
 )
 }

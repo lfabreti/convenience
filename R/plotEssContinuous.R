@@ -17,7 +17,7 @@
 #' 
 #' @export
 
-plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NULL,fill_color = NULL, filename = NULL, ...){
+plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NULL,fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
   
   col_threshold <- "gray69"
   
@@ -70,7 +70,9 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
                    add=T,
                    ...)
     }
-    title(main = "Effective Sample Size for continuous parameters per run", xlab = "Effective Sample Size", ylab = "Counts", outer = TRUE, line = 0.5, cex.main = 0.9)
+    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
+    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
+    title(main = "Effective Sample Size for continuous parameters per run", xlab = xlab, ylab = ylab, outer = TRUE, line = 0.5, cex.main = 0.9)
     
   }else {
     for (i in 1:ncol(x$continuous_parameters$ess)) {
@@ -84,9 +86,11 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
     
     par(mar = c(4.1, 3.9, 2.1, 1.0))
+    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
+    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
     plot <- plot(NA,
-                 xlab = "Effective Sample Size", 
-                 ylab = "Counts",
+                 xlab = xlab, 
+                 ylab = ylab,
                  main = "Effective Sample Size for continuous parameters",
                  cex.main = 0.9,
                  xlim = c(0, x_topLim ),
