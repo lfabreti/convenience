@@ -19,6 +19,11 @@
 
 plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NULL,fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
   
+  # Calculates min ESS according to the std error of the mean
+  minESS <- function(per){
+    return((1/(per*4))^2)
+  }
+  
   col_threshold <- "gray69"
   
   if( is.null(fill_color) ){
