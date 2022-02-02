@@ -19,11 +19,13 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
   if(format == "revbayes"){
     log_ext = "\\.log$"
     tree_ext="\\.trees$"
+    delim="\t"
     
   }else if(format == "mb"){
     skip = 1
     log_ext = "\\.p$"
     tree_ext="\\.t$"
+    delim="\t"
     
   }else if(format == "beast"){
     skip = 2
