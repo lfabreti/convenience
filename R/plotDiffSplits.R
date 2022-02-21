@@ -1,28 +1,18 @@
-#' Histogram of the ESS values
-#'
-#' Plots the histogram of the ESS values for the splits
+#' Plots the difference between splits of different runs
 #'
 #' @importFrom grDevices dev.off pdf
 #' @importFrom graphics abline hist layout legend lines par points polygon rect title
 #'
-#' @param x A list of convenience.diag type
-#' @param per_run If the plot should combine all runs or plot each run separately. Default value is FALSE
-#' @param breaks The number of bins to determine the intervals of the histogram
-#' @param precision The precision of the mean estimates. Default is 0.01
-#' @param fill_color The color to fill the histogram bars
-#' @param filename The name of the file to save the plot
-#' @param ... (various) Additional arguments passed to plot().
-#'
-#' @return Histogram
+#' @param output A list of convenience.diag type
+#' @param minimumESS The threshold for the ESS, default value is 625
+#' @param fill_color The color for the dots on the plot
+#' @param filename A filename to save the table, if NULL the table will be printed
+#' @param per_run If the plot should distinguish the pairwise comparison between runs with different symbols. Default value is FALSE
+#' @param ... (various) Additional arguments passed to plot()
 #'
 #' @export
 
-plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
-
-  # Calculates min ESS according to the std error of the mean
-  minESS <- function(per){
-    return((1/(per*4))^2)
-  }
+plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, per_run = FALSE, xlab = NULL, ylab = NULL, ...){
 
   col_threshold <- "gray69"
 
@@ -34,95 +24,129 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
     pdf(file = filename, width = 4.5, height = 4.5)
   }
 
-  minimumESS <- minESS(precision)
-  ESS_values <- vector()
+  if( minimumESS == 625) {
+    fdir <- system.file("thresholds/expectedDiff_625.rds", package = "convenience")
+    exp_diff_runs <- readRDS(fdir)
+  }
+  else  exp_diff_runs <- expectedDiffSplits(minimumESS)
 
-  if(per_run == TRUE){
-    n_runs <- ncol(x$tree_parameters$ess)
-
-    par(mfrow = c(n_runs/2,n_runs/2), oma = c(1.5,1.5,1.5,0) + 0.1, mar = c(2,2,2.3,2))
-    layout(matrix(c(1:n_runs), nrow=n_runs/2, ncol = n_runs/2, byrow=TRUE))
-
-    for (i in 1:n_runs) {
-      ESS_values <- x$tree_parameters$ess[,i]
-      ESS_values <- ESS_values[!is.na(ESS_values)]
-      if(is.null(breaks)){
-        breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+  ## Calculate the minimum ESS between runs for each split
+  ess_min_between_runs <- matrix(ncol=length(output$tree_parameters$frequencies), nrow=nrow(output$tree_parameters$ess))
+  n_runs <- length(output$tree_parameters$ess)
+  count <-1
+  for (i in 1:(n_runs-1)) {
+    for (j in (i+1):n_runs) {
+      for (z in 1:nrow(output$tree_parameters$ess)) {
+        ess_min_between_runs[z,count] <- min(output$tree_parameters$ess[z,i], output$tree_parameters$ess[z,j], na.rm = T)
       }
-
-      y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
-      x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
-
-      plot <- plot(NA,
-                   xlab = NA,
-                   ylab = NA,
-                   main = colnames(x$tree_parameters$ess)[i],
-                   xlim = c(0, x_topLim ),
-                   ylim = c(0, y_topLim+1),
-                   las=1,
-                   bty="l")
-      plot <- rect(xleft = minimumESS, ybottom = 0, xright = x_topLim, ytop = y_topLim+1, border = NA, col = "gray89")
-      plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col =  col_threshold, lwd= 2, lty=2)
-
-
-
-
-      plot <- hist(ESS_values,
-                   xlab = NA,
-                   ylab = NA,
-                   xlim = c(0, x_topLim ),
-                   ylim = c(0, y_topLim + 1),
-                   breaks = breaks,
-                   border = F,
-                   col = fill_color,
-                   add=T,
-                   ...)
+      count <- count + 1
     }
-    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
-    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
-    title(main = "Effective Sample Size for splits per run", cex.main = 0.9, xlab = xlab, ylab = ylab, outer = TRUE, line = 0.5)
+  }
+  row.names(ess_min_between_runs) <- row.names(output$tree_parameters$ess)
 
+  list_freq <- list()
+  list_diff <- list()
+  list_freq_low_ess <- list()
+  list_diff_low_ess <- list()
+  for (i in 1:length(output$tree_parameters$frequencies)) {
+    frequencies <- vector()
+    differences <- vector()
+    freq_low_ess <- vector()
+    diff_low_ess <- vector()
+    for (j in names(output$tree_parameters$frequencies[[i]])) {
+      if ( j %in% row.names(ess_min_between_runs)){
+        if ( ess_min_between_runs[j, i] < minimumESS ){
+          freq_low_ess <- c( freq_low_ess, as.vector(unlist(output$tree_parameters$frequencies[[i]][j])) )
+          diff_low_ess <- c( diff_low_ess, as.vector(unlist(output$tree_parameters$compare_runs[[i]][j])) )
+        }
+        else{
+          frequencies <- c( frequencies, as.vector(unlist(output$tree_parameters$frequencies[[i]][j])) )
+          differences <- c( differences, as.vector(unlist(output$tree_parameters$compare_runs[[i]][j])) )
+        }
+      }
+      else{
+        frequencies <- c( frequencies, as.vector(unlist(output$tree_parameters$frequencies[[i]][j])) )
+        differences <- c( differences, as.vector(unlist(output$tree_parameters$compare_runs[[i]][j])) )
+      }
+    }
+    list_freq[[i]] <- frequencies
+    list_diff[[i]] <- differences
+    list_freq_low_ess[[i]] <- freq_low_ess
+    list_diff_low_ess[[i]] <- diff_low_ess
+
+  }
+
+  x_axis <- exp_diff_runs[1,]
+  y_axis <- exp_diff_runs[2,]
+
+  y_lim <- max(unlist(list_diff), y_axis, unlist(list_diff_low_ess), na.rm = T)
+  y_lim <- y_lim + y_lim*0.5
+
+  par(mar = c(4.1, 4.9, 2.1, 1.3))
+  plot <- plot(NA,
+               xlab = NA,
+               ylab = NA,
+               main = "Difference in Split Frequencies",
+               cex.main = 0.9,
+               xlim = c(0.0,1.0),
+               ylim = c(0.0, y_lim),
+               las = 1)
+
+  plot <- polygon(x_axis, y_axis, col = "gray89", border = NA)
+  x_extra <- c(0.0, 0.01, 0.99, 1.0, 0.0)
+  y_extra <- c(0.0, min(y_axis), min(y_axis), 0.0, 0.0)
+
+  plot <- polygon(x_extra, y_extra, border = NA, col = "gray89")
+  plot <- lines(x_axis, y_axis, col = col_threshold, lwd=2)
+
+  if( is.null(xlab)) xlab <- "Split frequency" else xlab <- xlab
+  if( is.null(ylab)) ylab <- "Difference between splits" else ylab <- ylab
+  title(xlab = xlab, outer = F, line = 2.5)
+  title(ylab = ylab, outer = F, line = 3.5)
+
+
+  if( length(output$tree_parameters$frequencies) > 1 & per_run == TRUE ){
+
+    for (i in 1:length(output$tree_parameters$frequencies)) {
+      plot <- points(unlist(list_freq[i]), unlist(list_diff[i]), pch = i, col = fill_color)
+      if (length(list_freq_low_ess[i]) > 0){
+        plot <- points(unlist(list_freq_low_ess[i]), unlist(list_diff_low_ess[i]), pch = i, col = "tan1")
+        legend("topleft",
+               legend = c(paste("ESS",expression("<"),minimumESS),paste("ESS",expression(">"),minimumESS)),
+               pch = c(16,16),
+               col = c("tan1",fill_color),
+               box.lty = 2,
+               box.col="gray7",
+               cex = 0.7,
+               inset = 0.01)
+      }
+      legend("topright",
+             legend = names(output$tree_parameters$frequencies),
+             pch = c(1:length(output$tree_parameters$frequencies)),
+             box.lty = 2,
+             box.col = "gray7",
+             cex = 0.7,
+             inset = 0.01)
+    }
 
   } else{
-
-    for (i in 1:length(x$tree_parameters$ess)) {
-      ESS_values <- c(ESS_values, x$tree_parameters$ess[[i]])
+    frequencies <- unlist(list_freq)
+    differences <- unlist(list_diff)
+    freq_low_ess <- unlist(list_freq_low_ess)
+    diff_low_ess <- unlist(list_diff_low_ess)
+    plot <- points(frequencies, differences, pch = 16, col = fill_color)
+    if (length(freq_low_ess) > 0){
+      plot <- points(freq_low_ess, diff_low_ess, pch = 16, col = "tan1")
+      legend("topright",
+             legend = c(paste("ESS",expression("<"),minimumESS),paste("ESS",expression(">"),minimumESS)),
+             pch = c(16,16),
+             col = c("tan1",fill_color),
+             box.lty = 2,
+             box.col="gray7",
+             cex = 0.7,
+             inset = 0.01)
     }
-    ESS_values <- ESS_values[!is.na(ESS_values)]
 
-    if(is.null(breaks)){
-      breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
-    }
-
-    x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
-    y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
-
-    par(mar = c(4.1, 3.9, 2.1, 1.0))
-    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
-    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
-    plot <- plot(NA,
-                 xlab = xlab,
-                 ylab = ylab,
-                 main = "Effective Sample Size for splits",
-                 cex.main = 0.9,
-                 xlim = c(0, x_topLim ),
-                 ylim = c(0, y_topLim+1),
-                 las=1,
-                 bty="l")
-    plot <- rect(xleft = minimumESS, ybottom = 0, xright = x_topLim, ytop = y_topLim+1, border = NA, col = "gray89")
-    plot <- lines(x = c(minimumESS,minimumESS),y=c(0,y_topLim+1), col = col_threshold, lwd= 2, lty=2)
-
-
-
-
-    plot <- hist(ESS_values,
-                 xlim = c(0, x_topLim ),
-                 ylim = c(0, y_topLim + 1),
-                 breaks = breaks,
-                 border = F,
-                 col = fill_color,
-                 add=T,
-                 ...)
   }
 
   if( !(is.null(filename)) ){
