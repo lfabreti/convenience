@@ -4,7 +4,15 @@
 \alias{plotKS}
 \title{Histogram of the KS values}
 \usage{
-plotKS(x, precision = 0.01, fill_color = NULL, filename = NULL, ...)
+plotKS(
+  x,
+  precision = 0.01,
+  fill_color = NULL,
+  filename = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A list of convenience.diag type}

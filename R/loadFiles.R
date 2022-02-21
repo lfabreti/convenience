@@ -4,7 +4,7 @@
 #' 
 #' @param path The path to the folder with all the output
 #' @param list_files List of files with the output
-#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes"
+#' @param format The format of the phylogenetic output. Current supported formats are: "revbayes", "mb", "beast", "*beast", "phylobayes", "pyrate"
 #' @param tree_name The name of the column containing the trees, default = "psi"
 #' 
 #' @return List of type rwty.chain
@@ -19,25 +19,34 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
   if(format == "revbayes"){
     log_ext = "\\.log$"
     tree_ext="\\.trees$"
+    delim="\t"
     
   }else if(format == "mb"){
     skip = 1
     log_ext = "\\.p$"
     tree_ext="\\.t$"
+    delim="\t"
     
   }else if(format == "beast"){
     skip = 2
     log_ext = "\\.log$"
     tree_ext="\\.trees$"
+    delim="\t"
     
   }else if(format == "*beast"){
-    skip = 2
+    skip = 0
     log_ext = "\\.log$"
-    tree_ext="\\.species.trees$"
+    tree_ext="\\.trees$"
+    delim=","
     
   }else if(format == "phylobayes"){
     log_ext = "\\.trace$"
     tree_ext="\\.treelist$"
+    
+  }else if(format == "pyrate"){
+    log_ext = "\\.log$"
+    tree_ext="\\.trees$"
+    delim="\t"
     
   }else{
     stop("Provide format!")
@@ -49,7 +58,6 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
   
   if ( !is.null(path) ){
     files <- list.files(path, recursive=F)
-    #files <- files[ grepl("*run*|*joint*|*stone*", files) ]
     
     logFiles <- files[ grepl(log_ext, files) ]
     treeFiles <- files[ grepl(tree_ext, files) ]
@@ -89,11 +97,10 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
     # path is provided
     if(!is.null(path)){
       setwd(path)
-      #output <- list()
       
       for (i in 1:length(logFiles)){
         
-        output[[i]] <- readTrace(logFiles[i], burnin = 0, skip = skip)
+        output[[i]] <- readTrace(logFiles[i], burnin = 0, skip = skip, delim = delim)
       }
       setwd("..")
     }
@@ -103,7 +110,7 @@ loadFiles <- function( path = NULL, list_files = NULL, format, tree_name =  "psi
       
       for (i in 1:length(logFiles)){
         
-        output[[i]] <- readTrace(logFiles[i], burnin = 0, skip = skip)
+        output[[i]] <- readTrace(logFiles[i], burnin = 0, skip = skip, delim = delim)
       }
     }
     

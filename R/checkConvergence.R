@@ -43,7 +43,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   }
   
   if ( is.null(control$namesToExclude) ){
-    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood|time|loglik|iter|topo|Replicate_ID"
+    namesToExclude <- "br_lens|bl|Iteration|Likelihood|Posterior|Prior|Gen|LnL|LnPr|state|joint|prior|likelihood|time|loglik|iter|topo|Replicate_ID|Sample|posterior|it"
   } else {
     namesToExclude <- control$namesToExclude
   }
@@ -76,6 +76,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   #####   BURN-IN   #####
   print("Calculating burn-in")
+  my_runs_aux <- my_runs
   while (burnin <= 0.5) {
     
     list_control <- 0 
@@ -154,7 +155,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     
     if( length(my_runs[[1]]$trees) > 0 & length(my_runs[[1]]$ptable) > 0 ){
       for (i in 1:length(results_splits)) {
-        if( length(results_splits[[i]]) > 0 | ks_windows[i,] < 0) list_control <- list_control+1
+        if( length(results_splits[[i]]) > 0 | any(ks_windows[i,] < 0) ) list_control <- list_control+1
       }
     } else if ( length(my_runs[[1]]$ptable) == 0){
       for (i in 1:length(results_splits)) {
@@ -164,7 +165,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     
     if(list_control > 0){
       burnin <- burnin + 0.1
-      my_runs <- removeBurnin(my_runs, burnin)
+      my_runs <- removeBurnin(my_runs_aux, burnin)
     } 
     else break
     
@@ -382,7 +383,7 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
           split_freq_runs[[i]] <- names(which(output_tree_parameters[[2]][[i]] <= 0))
         }
         names(split_freq_runs) <- paste("Between_", names(output_tree_parameters[[2]]), sep = "")
-        decision_list_trees[[3]] <- split_freq_runs
+        decision_list_trees[[2]] <- split_freq_runs
         for (i in 1:length(decision_list_trees[[2]])) {
           if ( length(decision_list_trees[[2]][[i]]) > 0 ){
             fails <- c(fails, paste(length(decision_list_trees[[2]][[i]]), "splits failed the split difference test between runs for", names(decision_list_trees[[2]][i])))
@@ -472,6 +473,8 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
   
   
   ##### SUMMARIZING RESULTS #####
+  
+  final_output$burnin <- burnin
   
   message_list <- list()
   message_complete <- list()
@@ -584,8 +587,6 @@ checkConvergence <- function(path = NULL, list_files = NULL, format = "revbayes"
     class(final_output$failed) <- "list.fails"
     
   }
-  
-  
   
   ##### Changing formats for better looking output #####
   

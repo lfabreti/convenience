@@ -22,7 +22,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
       if ( typeof(cont_param) == "list" ){
         for (rows in 1:length(cont_param)) {
           
-          if ( is.nan( effectiveSize(cont_param[[rows]]) ) ) {
+          if ( is.nan( essTracerC(cont_param[[rows]]) ) ) {
             print(paste(names(cont_param[rows]), " ess is not a number!"))
           }
         }
@@ -38,7 +38,7 @@ essContParam <- function(runs, windows=FALSE, namesToExclude, tracer) {
     n_param <- length(vecEss)/length(runs)
     name_param <- names(vecEss[1:n_param])
     
-    df_ess <- data.frame(matrix(unlist(vecEss), nrow = n_param, byrow = T), stringsAsFactors = F)
+    df_ess <- data.frame(matrix(unlist(vecEss), nrow = n_param, byrow = F), stringsAsFactors = F)
     rownames(df_ess) <- name_param
     
     for (i in 1:ncol(df_ess)) {

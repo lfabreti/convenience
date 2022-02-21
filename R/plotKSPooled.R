@@ -9,7 +9,6 @@
 #' 
 #' @param x A list of convenience.diag type
 #' @param precision The precision of the mean estimates. Default is 0.01
-#' @param bins The number of bins to determine the intervals of the histogram
 #' @param filename The name of the file to save the plot
 #' @param ... (various) Additional arguments passed to plot().
 #' 
@@ -17,16 +16,12 @@
 #' 
 #' @export
 
-plotKSPooled <- function(x, precision = 0.01, bins = NULL, filename = NULL, ...){
+plotKSPooled <- function(x, precision = 0.01, filename = NULL, ...){
   
   col_threshold <- "gray69"
   
   if( !(is.null(filename)) ){
     pdf(file = filename, width = 6, height = 6)
-  }
-  
-  if( (is.null(bins)) ){
-    bins <- 10
   }
   
   minimumESS <- minESS(precision)
@@ -37,8 +32,7 @@ plotKSPooled <- function(x, precision = 0.01, bins = NULL, filename = NULL, ...)
     ks_values[[i]] <- as.numeric(x$continuous_parameters$compare_runs[i,])
   }
   
-  increment <- (max( unlist(ks_values)) - min(unlist(ks_values)) ) / bins
-  break_values <- seq( from = min(unlist(ks_values)), to = max( unlist(ks_values)), by = increment )
+  break_values <- seq(0, max(minimumKS, unlist(ks_values))+0.01, 0.0023)
   
   colors_hist <- viridis::viridis(length(ks_values))  
   

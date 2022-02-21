@@ -11,6 +11,8 @@ plotEssContinuous(
   breaks = NULL,
   fill_color = NULL,
   filename = NULL,
+  xlab = NULL,
+  ylab = NULL,
   ...
 )
 }

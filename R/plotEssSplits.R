@@ -17,16 +17,17 @@
 #' 
 #' @export
 
-plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, fill_color = NULL, filename = NULL, ...){
+plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
+  
+  # Calculates min ESS according to the std error of the mean
+  minESS <- function(per){
+    return((1/(per*4))^2)
+  }
   
   col_threshold <- "gray69"
   
   if( is.null(fill_color) ){
     fill_color <- "seagreen4"
-  }
-  
-  if(is.null(breaks)){
-    breaks <- 10
   }
   
   if( !(is.null(filename)) ){
@@ -45,6 +46,10 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
     for (i in 1:n_runs) {
       ESS_values <- x$tree_parameters$ess[,i]
       ESS_values <- ESS_values[!is.na(ESS_values)]
+      if(is.null(breaks)){
+        breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+      }
+      
       y_topLim <- max(hist(ESS_values, plot = FALSE)$counts)
       x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
       
@@ -73,7 +78,9 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
                    add=T,
                    ...)
     }
-    title(main = "Effective Sample Size for splits per run", cex.main = 0.9, xlab = "Effective Sample Size", ylab = "Counts", outer = TRUE, line = 0.5)
+    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
+    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
+    title(main = "Effective Sample Size for splits per run", cex.main = 0.9, xlab = xlab, ylab = ylab, outer = TRUE, line = 0.5)
     
     
   } else{
@@ -82,14 +89,20 @@ plotEssSplits <- function(x, per_run = FALSE, breaks = NULL, precision = 0.01, f
       ESS_values <- c(ESS_values, x$tree_parameters$ess[[i]])
     }
     ESS_values <- ESS_values[!is.na(ESS_values)]
+    
+    if(is.null(breaks)){
+      breaks <- seq(0, (max(minimumESS, ESS_values))+50, 25)
+    }
+    
     x_topLim <- max(minimumESS,ESS_values) + (max(minimumESS, ESS_values))/10
     y_topLim <- max(hist(ESS_values, breaks = breaks, plot = FALSE)$counts)
     
     par(mar = c(4.1, 3.9, 2.1, 1.0))
-    
+    if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
+    if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
     plot <- plot(NA,
-                 xlab = "Effective Sample Size", 
-                 ylab = "Counts",
+                 xlab = xlab, 
+                 ylab = ylab,
                  main = "Effective Sample Size for splits",
                  cex.main = 0.9,
                  xlim = c(0, x_topLim ),

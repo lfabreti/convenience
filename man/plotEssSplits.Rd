@@ -11,6 +11,8 @@ plotEssSplits(
   precision = 0.01,
   fill_color = NULL,
   filename = NULL,
+  xlab = NULL,
+  ylab = NULL,
   ...
 )
 }

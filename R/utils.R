@@ -341,6 +341,7 @@ getInfo <- function(all_runs, run, namesToExclude, trees = FALSE, splitWindows =
       if( typeof(cont_param) == "list"){
         all_wind <- vector("list", length = 0)
         len_run <- length(cont_param[[1]])
+        #len_run <- nrow(cont_param[[1]])
         second <- (1*(0.2*len_run))
         third <- (2*(0.2*len_run))
         fourth <- (3*(0.2*len_run))
