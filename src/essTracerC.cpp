@@ -52,5 +52,8 @@ double essTracerC( NumericVector x ){
   // effective sample size
   double ess = samples / act;
   
+  // need to free the allocated memory
+  delete [] gammaStat;
+  
   return ess;
 }
