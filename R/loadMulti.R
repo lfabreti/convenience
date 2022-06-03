@@ -54,10 +54,9 @@ loadMulti <- function(path = NULL, tree_files = NULL, log_files = NULL, format =
   }
   
   # Add names to chains
-  if(is.na(labels)){
+  if( any(is.na(labels)) ){
     names(output) <- lapply(tfiles, FUN = function(x) basename (x))
-  }
-  else{
+  } else{
     names(output) <- labels
   }
   
