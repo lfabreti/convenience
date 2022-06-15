@@ -12,6 +12,7 @@ plotDiffSplits(
   per_run = FALSE,
   xlab = NULL,
   ylab = NULL,
+  title = NULL,
   ...
 )
 }
@@ -25,6 +26,12 @@ plotDiffSplits(
 \item{filename}{A filename to save the table, if NULL the table will be printed}
 
 \item{per_run}{If the plot should distinguish the pairwise comparison between runs with different symbols. Default value is FALSE}
+
+\item{xlab}{Defines the label for the x-axis. To remove the label set to NA. Default = NULL}
+
+\item{ylab}{Defines the label for the y-axis. To remove the label set to NA. Default = NULL}
+
+\item{title}{Defines the title of the plot. To remove the title set to NA. Default = NULL}
 
 \item{...}{(various) Additional arguments passed to plot()}
 }

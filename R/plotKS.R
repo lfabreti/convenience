@@ -9,6 +9,9 @@
 #' @param precision The precision of the mean estimates. Default is 0.01
 #' @param fill_color The color to fill the histogram bars
 #' @param filename The name of the file to save the plot
+#' @param xlab Defines the label for the x-axis. To remove the label set to NA. Default = NULL
+#' @param ylab Defines the label for the y-axis. To remove the label set to NA. Default = NULL
+#' @param title Defines the title of the plot. To remove the title set to NA. Default = NULL
 #' @param ... (various) Additional arguments passed to plot().
 #' 
 #' @return Histogram
@@ -16,7 +19,7 @@
 #' @export
 
 
-plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
+plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, title = NULL, ...){
   
   col_threshold <- "gray69"
   
@@ -41,10 +44,11 @@ plotKS <- function(x, precision = 0.01, fill_color = NULL, filename = NULL, xlab
   par(mar = c(4.1, 3.9, 2.1, 1.0))
   if( is.null(xlab)) xlab <- "Kolmogorov-Smirnov score" else xlab <- xlab
   if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
+  if( is.null(title)) title <- "Kolmogorov-Smirnov test" else title <- title
   plot <- plot(NA,
                xlab = xlab,
                ylab = ylab,
-               main = "Kolmogorov-Smirnov test",
+               main = title,
                cex.main = 0.9,
                xlim = c( (min(minimumKS, KS_values) - 0.01), (max(minimumKS, KS_values) + 0.01)  ),
                ylim = c(0,y_topLim + 1),

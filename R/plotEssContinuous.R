@@ -11,13 +11,16 @@
 #' @param breaks The number of bins to determine the intervals of the histogram
 #' @param fill_color The color to fill the histogram bars
 #' @param filename The name of the file to save the plot
+#' @param xlab Defines the label for the x-axis. To remove the label set to NA. Default = NULL
+#' @param ylab Defines the label for the y-axis. To remove the label set to NA. Default = NULL
+#' @param title Defines the title of the plot. To remove the title set to NA. Default = NULL
 #' @param ... (various) Additional arguments passed to plot().
 #'
 #' @return Histogram
 #'
 #' @export
 
-plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NULL,fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, ...){
+plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NULL,fill_color = NULL, filename = NULL, xlab = NULL, ylab = NULL, title = NULL, ...){
 
   # Calculates min ESS according to the std error of the mean
   minESS <- function(per){
@@ -77,7 +80,8 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     }
     if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
     if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
-    title(main = "Effective Sample Size for continuous parameters per run", xlab = xlab, ylab = ylab, outer = TRUE, line = 0.5, cex.main = 0.9)
+    if( is.null(title)) title <- "Effective Sample Size for continuous parameters per run" else title <- title
+    title(main = title, xlab = xlab, ylab = ylab, outer = TRUE, line = 0.5, cex.main = 0.9)
 
   } else {
     for (i in 1:ncol(x$continuous_parameters$ess)) {
@@ -94,10 +98,11 @@ plotEssContinuous <- function(x, per_run = FALSE, precision = 0.01, breaks = NUL
     par(mar = c(4.1, 3.9, 2.1, 1.0))
     if( is.null(xlab)) xlab <- "Effective Sample Size" else xlab <- xlab
     if( is.null(ylab)) ylab <- "Counts" else ylab <- ylab
+    if( is.null(title)) title <- "Effective Sample Size for continuous parameters" else title <- title
     plot <- plot(NA,
                  xlab = xlab,
                  ylab = ylab,
-                 main = "Effective Sample Size for continuous parameters",
+                 main = title,
                  cex.main = 0.9,
                  xlim = c(0, x_topLim ),
                  ylim = c(0, y_topLim+1),

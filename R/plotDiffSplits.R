@@ -8,11 +8,14 @@
 #' @param fill_color The color for the dots on the plot
 #' @param filename A filename to save the table, if NULL the table will be printed
 #' @param per_run If the plot should distinguish the pairwise comparison between runs with different symbols. Default value is FALSE
+#' @param xlab Defines the label for the x-axis. To remove the label set to NA. Default = NULL
+#' @param ylab Defines the label for the y-axis. To remove the label set to NA. Default = NULL
+#' @param title Defines the title of the plot. To remove the title set to NA. Default = NULL
 #' @param ... (various) Additional arguments passed to plot()
 #'
 #' @export
 
-plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, per_run = FALSE, xlab = NULL, ylab = NULL, ...){
+plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename = NULL, per_run = FALSE, xlab = NULL, ylab = NULL, title=NULL, ...){
 
   col_threshold <- "gray69"
 
@@ -82,11 +85,12 @@ plotDiffSplits <- function(output, minimumESS = 625, fill_color = NULL, filename
   y_lim <- max(unlist(list_diff), y_axis, unlist(list_diff_low_ess), na.rm = T)
   y_lim <- y_lim + y_lim*0.5
 
+  if( is.null(title)) title <- "Difference in Split Frequencies" else title <- title
   par(mar = c(4.1, 4.9, 2.1, 1.3))
   plot <- plot(NA,
                xlab = NA,
                ylab = NA,
-               main = "Difference in Split Frequencies",
+               main = title,
                cex.main = 0.9,
                xlim = c(0.0,1.0),
                ylim = c(0.0, y_lim),

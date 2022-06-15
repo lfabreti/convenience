@@ -13,6 +13,7 @@ plotEssContinuous(
   filename = NULL,
   xlab = NULL,
   ylab = NULL,
+  title = NULL,
   ...
 )
 }
@@ -28,6 +29,12 @@ plotEssContinuous(
 \item{fill_color}{The color to fill the histogram bars}
 
 \item{filename}{The name of the file to save the plot}
+
+\item{xlab}{Defines the label for the x-axis. To remove the label set to NA. Default = NULL}
+
+\item{ylab}{Defines the label for the y-axis. To remove the label set to NA. Default = NULL}
+
+\item{title}{Defines the title of the plot. To remove the title set to NA. Default = NULL}
 
 \item{...}{(various) Additional arguments passed to plot().}
 }
