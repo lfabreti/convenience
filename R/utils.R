@@ -14,8 +14,8 @@
 #' 
 #' @useDynLib convenience
 #' @importFrom Rcpp sourceCpp
-NULL
-#> NULL
+#' @noRd
+
 
 # Calculates the relative difference of some stats for 2 dataframes
 calcRelativeDiff <- function(dataframe1, dataframe2, stats){
@@ -43,11 +43,13 @@ check.clades.freq <- function(runs, freq){
     start <- 1
     end <- length(x)
     
-    if(class(x) == "rwty.chain"){
+    #if(class(x) == "rwty.chain")
+    if(isa(x, "rwty.chain")){
       x <- x$trees
     }
     
-    if (length(x) == 1 && class(x[[1]]) == "multiPhylo"){
+    #if (length(x) == 1 && class(x[[1]]) == "multiPhylo")
+    if (length(x) == 1 && isa(x[[1]], "multiPhylo")){
       x <- x[[1]]
     }
     
@@ -86,11 +88,13 @@ check.clades.freq <- function(runs, freq){
 # Adjust the names of tips for split frequencies
 clade.freq.named <- function (x, start, end, rooted=FALSE, ...) {
   
-  if(class(x) == "rwty.chain"){
+  #if(class(x) == "rwty.chain")
+  if(isa(x, "rwty.chain")){
     x <- x$trees
   }
   
-  if (length(x) == 1 && class(x[[1]]) == "multiPhylo"){
+  #if (length(x) == 1 && class(x[[1]]) == "multiPhylo")
+  if (length(x) == 1 && isa(x[[1]], "multiPhylo")){
     x <- x[[1]]
   }
   
@@ -149,11 +153,13 @@ clade.freq.tree <- function (x, rooted=FALSE, ...) {
 
 clade.freq.trees <- function (x, start, end, rooted=FALSE, ...) {
   
-  if(class(x) == "rwty.chain"){
+  #if(class(x) == "rwty.chain")
+  if(isa(x, "rwty.chain")){
     x <- x$trees
   }
   
-  if (length(x) == 1 && class(x[[1]]) == "multiPhylo"){
+  #if (length(x) == 1 && class(x[[1]]) == "multiPhylo")
+  if (length(x) == 1 && isa(x[[1]], "multiPhylo")){
     x <- x[[1]]
   }
   
